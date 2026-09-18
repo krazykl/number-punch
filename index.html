@@ -42,6 +42,14 @@ padding:24px 18px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.45)}
 .effect{font-size:17px;color:#dce9f6;margin-top:9px}.box button{width:100%;margin-top:16px}
 .note{color:#d8e5f2;font-size:14px;line-height:1.4;margin-bottom:14px}
 .top{display:flex;justify-content:space-between;align-items:center}
+
+.board{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px}
+
+.tile{aspect-ratio:1;background:linear-gradient(var(--tile2),var(--tile));border:1px solid #3b6288;border-radius:14px;font-size:24px;font-weight:900;display:flex;align-items:center;justify-content:center}
+
+.tile.flash{background:#eef8ff;color:#09203a}
+
+.tile.solved{opacity:0;pointer-events:none}
 </style>
 </head>
 <body>
