@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Number Punch - Practice Test</title>
+<style>
+:root{
+  --bg:#071426;--panel:#0d213b;--tile:#173354;--tile2:#21466f;
+  --text:#f5f8ff;--muted:#a9bad0;--accent:#5fd0ff;--border:#315a80;
+}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(#071426,#0a1930);color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+.app{max-width:540px;margin:auto;padding:18px 16px 32px}
+h1{text-align:center;margin:6px 0 2px;font-size:31px}
+.sub{text-align:center;color:var(--muted);margin-bottom:16px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:16px}
+button{font:inherit;color:white;background:#112b49;border:1px solid var(--border);
+border-radius:14px;padding:13px;font-weight:800}
+button.primary{background:#1776a9}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hidden{display:none!important}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.stat{background:#0c1e34;border:1px solid #274866;border-radius:14px;padding:9px;text-align:center}
+.k{font-size:11px;color:var(--muted)} .v{font-weight:900;margin-top:3px}
+.boardWrap{position:relative;overflow:hidden;border-radius:20px;border:1px solid #284e71}
+.backdrop{position:absolute;inset:0;background:linear-gradient(#61b8e8,#98d3ec 48%,#31583c 49%,#173222)}
+.backdrop:before{content:"";position:absolute;left:0;right:0;bottom:25%;height:42%;background:#254b35;
+clip-path:polygon(0 80%,18% 45%,32% 70%,50% 20%,66% 62%,83% 35%,100% 75%,100% 100%,0 100%)}
+.board{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px}
+.tile{aspect-ratio:1;background:linear-gradient(var(--tile2),var(--tile));border:1px solid #3b6288;
+border-radius:14px;font-size:24px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.tile.flash{background:#eef8ff;color:#09203a}.tile.solved{opacity:0;pointer-events:none}
+.message{min-height:52px;margin-top:12px;padding:12px;border:1px solid #274866;border-radius:14px;
+background:#0c1e34;text-align:center;font-weight:800}
+.overlay{position:fixed;inset:0;background:rgba(2,10,20,.65);display:flex;align-items:center;justify-content:center;
+padding:24px;z-index:99}
+.box{width:min(420px,92vw);background:#102946;border:2px solid #4ebeea;border-radius:24px;
+padding:24px 18px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.45)}
+.icon{font-size:54px}.title{font-size:25px;font-weight:950;margin-top:8px}
+.effect{font-size:17px;color:#dce9f6;margin-top:9px}.box button{width:100%;margin-top:16px}
+.note{color:#d8e5f2;font-size:14px;line-height:1.4;margin-bottom:14px}
+.top{display:flex;justify-content:space-between;align-items:center}
+</style>
+</head>
+<body>
+<div class="app">
+<section id="home">
+  <h1>✊ NUMBER PUNCH</h1>
+  <div class="sub">Find the numbers. Beat your best.</div>
+  <div class="card">
+    <div class="note"><b>Quick tutorial:</b> Find numbers 1 to 15 in order. The ★ is the Mystery Tile. When you hit it, the exact effect now appears clearly before play continues.</div>
+    <div class="grid2">
+      <button class="primary" id="daily">Daily Challenge</button>
+      <button id="practice">Practice Mode</button>
+    </div>
+  </div>
+</section>
+
+<section id="game" class="hidden">
+  <div class="top">
+    <div>
+      <div id="mode" style="font-size:20px;font-weight:950">Practice Mode</div>
+      <div class="sub" style="text-align:left;margin:0">Mountains / Nature</div>
+    </div>
+    <button id="exit">Exit</button>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="k">TIME</div><div class="v" id="time">00:00.0</div></div>
+    <div class="stat"><div class="k">FIND</div><div class="v" id="next">1 / 15</div></div>
+    <div class="stat"><div class="k">SCORE</div><div class="v" id="score">10,000</div></div>
+  </div>
+
+  <div class="boardWrap">
+    <div class="backdrop"></div>
+    <div id="board" class="board"></div>
+  </div>
+
+  <div class="message" id="message">Find number 1.</div>
+
+  <div class="stats" style="grid-template-columns:1fr 1fr">
+    <div class="stat"><div class="k">WRONG TAPS</div><div class="v" id="wrong">0</div></div>
+    <div class="stat"><div class="k">MYSTERY</div><div class="v" id="mystery">Ready</div></div>
+  </div>
+</section>
+
+<section id="results" class="hidden">
+  <div class="card" style="text-align:center">
+    <div style="font-size:54px">✊</div>
+    <h2>Puzzle Complete!</h2>
+    <div class="k">FINAL SCORE</div>
+    <div id="finalScore" style="font-size:44px;font-weight:950;margin:6px 0 14px">0</div>
+    <div class="grid2">
+      <div class="stat"><div class="k">TIME</div><div class="v" id="finalTime"></div></div>
+      <div class="stat"><div class="k">WRONG</div><div class="v" id="finalWrong"></div></div>
+    </div>
+    <button class="primary" id="again" style="width:100%;margin-top:14px">Play Again</button>
+    <button id="homeBtn" style="width:100%;margin-top:8px">Back to Home</button>
+  </div>
+</section>
+</div>
+
+<div id="overlay" class="overlay hidden">
+  <div class="box">
+    <div class="icon" id="icon">⭐</div>
+    <div class="title" id="title">Mystery Effect</div>
+    <div class="effect" id="effect"></div>
+    <button class="primary" id="continue">Got it — keep playing</button>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $=id=>document.getElementById(id);
+  const home=$('home'),game=$('game'),results=$('results'),board=$('board');
+  const dailyBoard=[7,1,12,5,14,9,3,11,2,15,8,4,10,6,13,'★'];
+  let state=null,timer=null,lastMode='practice';
+
+  function show(x){[home,game,results].forEach(v=>v.classList.add('hidden'));x.classList.remove('hidden')}
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+  function fmt(ms){const t=ms/1000,m=Math.floor(t/60),r=(t%60).toFixed(1).padStart(4,'0');return String(m).padStart(2,'0')+':'+r}
+  function currentScore(){return Math.max(0,Math.round(10000-((performance.now()-state.start)/1000)*50-state.wrong*100+state.delta))}
+  function hud(){if(!state||state.done)return;$('time').textContent=fmt(performance.now()-state.start);$('score').textContent=currentScore().toLocaleString()}
+
+  function popup(icon,title,effect){
+    $('icon').textContent=icon;$('title').textContent=title;$('effect').textContent=effect;$('overlay').classList.remove('hidden');
+  }
+  $('continue').onclick=()=> $('overlay').classList.add('hidden');
+
+  function start(mode){
+    if(timer)clearInterval(timer);
+    lastMode=mode;
+    const vals=mode==='daily'?[...dailyBoard]:shuffle([...Array.from({length:15},(_,i)=>i+1),'★']);
+    state={mode,start:performance.now(),next:1,wrong:0,delta:0,shield:false,mysteryUsed:false,done:false};
+    $('mode').textContent=mode==='daily'?'Daily Challenge':'Practice Mode';
+    $('next').textContent='1 / 15';$('wrong').textContent='0';$('mystery').textContent='Ready';$('message').textContent='Find number 1.';
+    board.innerHTML='';
+    vals.forEach(v=>{
+      const b=document.createElement('button');
+      b.className='tile';b.dataset.v=v;b.setAttribute('aria-label','Hidden tile');
+      b.onclick=()=>tap(b,v);board.appendChild(b);
+    });
+    show(game);timer=setInterval(hud,100);hud();
+  }
+
+  function flash(b,v,ms=700){
+    b.textContent=v;b.classList.add('flash');
+    setTimeout(()=>{if(!b.classList.contains('solved')){b.textContent='';b.classList.remove('flash')}},ms);
+  }
+
+  function mystery(){
+    const effects=['bonus','penalty','reveal','flash','shield'];
+    const e=state.mode==='daily'?'bonus':effects[Math.floor(Math.random()*effects.length)];
+    $('mystery').textContent='Used';
+
+    if(e==='bonus'){
+      state.delta+=300;
+      popup('⭐','BONUS: +300 POINTS','300 points were added to your score.');
+      $('message').textContent='Mystery Tile: +300 points.';
+    } else if(e==='penalty'){
+      state.delta-=300;
+      popup('⚠️','MYSTERY: -300 POINTS','300 points were removed from your score.');
+      $('message').textContent='Mystery Tile: -300 points.';
+    } else if(e==='reveal'){
+      const b=[...board.children].find(x=>Number(x.dataset.v)===state.next&&!x.classList.contains('solved'));
+      if(b)flash(b,state.next,1400);
+      popup('👀','BONUS: NEXT NUMBER REVEALED','The next correct number is highlighted briefly.');
+      $('message').textContent='Mystery Tile: next number revealed.';
+    } else if(e==='flash'){
+      shuffle([...board.children].filter(x=>!x.classList.contains('solved')&&x.dataset.v!=='★'))
+        .slice(0,4).forEach(x=>flash(x,x.dataset.v,1200));
+      popup('🧠','BONUS: MEMORY FLASH','Four hidden tiles are shown briefly. Remember their positions!');
+      $('message').textContent='Mystery Tile: Memory Flash.';
+    } else {
+      state.shield=true;$('mystery').textContent='Shield';
+      popup('🛡️','BONUS: MISTAKE SHIELD','Your next wrong tap will not cost 100 points.');
+      $('message').textContent='Mystery Tile: Mistake Shield active.';
+    }
+    hud();
+  }
+
+  function tap(b,v){
+    if(state.done||b.classList.contains('solved')||!$('overlay').classList.contains('hidden'))return;
+    if(v==='★'){
+      if(state.mysteryUsed)return;
+      state.mysteryUsed=true;b.textContent='★';b.classList.add('solved');mystery();return;
+    }
+    if(Number(v)===state.next){
+      b.textContent=v;b.classList.add('solved');state.next++;
+      if(state.next>15)finish();
+      else{$('next').textContent=state.next+' / 15';$('message').textContent='Good! Now find '+state.next+'.'}
+    } else {
+      flash(b,v);
+      if(state.shield){
+        state.shield=false;$('mystery').textContent='Used';
+        popup('🛡️','SHIELD USED','That wrong tap cost you 0 points.');
+        $('message').textContent='Mistake Shield saved that tap.';
+      } else {
+        state.wrong++;$('wrong').textContent=state.wrong;$('message').textContent='Wrong tile. Find '+state.next+'.';
+      }
+    }
+  }
+
+  function finish(){
+    state.done=true;if(timer)clearInterval(timer);
+    $('finalScore').textContent=currentScore().toLocaleString();
+    $('finalTime').textContent=fmt(performance.now()-state.start);
+    $('finalWrong').textContent=state.wrong;
+    show(results);
+  }
+
+  $('daily').onclick=()=>start('daily');
+  $('practice').onclick=()=>start('practice');
+  $('exit').onclick=()=>{if(timer)clearInterval(timer);show(home)};
+  $('again').onclick=()=>start(lastMode);
+  $('homeBtn').onclick=()=>show(home);
+})();
+</script>
+</body>
+</html>
