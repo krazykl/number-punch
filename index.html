@@ -142,7 +142,7 @@ padding:24px 18px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.45)}
       b.className='tile';b.dataset.v=v;b.setAttribute('aria-label','Hidden tile');
       b.onclick=()=>tap(b,v);board.appendChild(b);
     });
-    show(game);timer=setInterval(hud,100);hud();
+    show(game);board.style.pointerEvents='none';$('message').textContent='4';setTimeout(()=>{$('message').textContent='3'},1000);setTimeout(()=>{$('message').textContent='2'},2000);setTimeout(()=>{$('message').textContent='1'},3000);setTimeout(()=>{$('message').textContent='GO!';state.start=performance.now();board.style.pointerEvents='auto';timer=setInterval(hud,100);hud()},4000);
   }
 
   function flash(b,v,ms=700){
