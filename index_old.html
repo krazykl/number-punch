@@ -80,8 +80,8 @@ padding:24px 18px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.45)}
   <h1>✊ NUMBER PUNCH</h1>
   <div class="sub">Find the numbers. Beat your best.</div>
   <div class="card">
-    <div class="note"><b>Quick tutorial:</b> Find the numbers in order. The ★ is the Mystery Tile. When you hit it, the exact effect now appears clearly before play continues.</div>
- <div id="difficulty">difficulty:<button id="easy">easy (1–15)</button> <button id="medium">medium (1–19)</button> <button id="hard">hard (1–23)</button>
+    <div class="note"><b>Quick tutorial:</b> Find numbers 1 to 15 in order. The ★ is the Mystery Tile. When you hit it, the exact effect now appears clearly before play continues.</div>
+ <div id="difficulty">difficulty:<button id="easy">easy</button> <button id="medium">medium</button> <button id="hard">hard</button>
 </div>   
 <div class="grid2">
       <button class="primary" id="daily">Daily Challenge</button>
@@ -263,7 +263,7 @@ padding:24px 18px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.45)}
   $('daily').onclick=()=>start('daily');
   $('practice').onclick=()=>{
 selectedMaxNumber=document.getElementById('easy').classList.contains('selected')?
-15:document.getElementById('medium').classList.contains('selected')?19:23;
+15:document.getElementById('medium').classList.contains('selected')?22:26;
 start('practice');};
   $('exit').onclick=()=>{if(timer)clearInterval(timer);show(home)};
   $('again').onclick=()=>start(lastMode);
@@ -271,7 +271,7 @@ start('practice');};
 })();
 let selectedMaxNumber =15;
 document.getElementById('easy').onclick = function() {
-selectedMaxNumber = 15;
+selctedMaxNumber = 15;
 document.getElementById('next').textContent = '1 / 15';
 document.querySelectorAll('#difficulty button').forEach(b=>b.classList.remove('selected'));
 document.getElementById('easy').classList.add('selected');
@@ -279,12 +279,12 @@ document.getElementById('easy').classList.add('selected');
 document.getElementById('medium').onclick = function() {
 document.querySelectorAll('#difficulty button').forEach(b=>b.classList.remove('selected'));
 document.getElementById('medium').classList.add('selected');
-selectedMaxNumber = 19;
-document.getElementById('next').textContent = '1 / 19';
+selectedMaxNumber = 22;
+document.getElementById('next').textContent = '1 / 22';
 };
 document.getElementById('hard').onclick = function() {
-selectedMaxNumber = 23;
-document.getElementById('next').textContent = '1 / 23';
+selectedMaxNumber = 26;
+document.getElementById('next').textContent = '1 / 26';
 document.querySelectorAll('#difficulty button').forEach(b=>b.classList.remove('selected'));
 document.getElementById('hard').classList.add('selected');
 };
