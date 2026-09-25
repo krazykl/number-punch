@@ -88,7 +88,7 @@ padding:24px 18px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.45)}
   <div class="sub">Find the numbers. Beat your best.</div>
   <div class="card">
     <div class="note"><b>Quick tutorial:</b> Find the numbers in order. The ★ is the Mystery Tile. When you hit it, the exact effect now appears clearly before play continues.</div>
-<div id="difficulty">difficulty:<button id="easy">easy (1–15)</button> <button id="medium">medium (1–19)</button> <button id="hard">hard (1–23)</button>
+<div id="difficulty">Difficulty: <button id="easy" class="selected">Easy (1–15) · Free</button> <button id="medium">🔒 Medium (1–19) · Plus</button> <button id="hard">🔒 Hard (1–23) · Plus</button>
 </div>   
 <button class="sound-toggle" type="button" aria-pressed="true" style="width:100%;margin:10px 0">Sound: On</button>
 <button class="lights-toggle" type="button" aria-pressed="true" style="width:100%;margin:0 0 10px">Border Lights: On</button>
@@ -101,14 +101,14 @@ padding:24px 18px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.45)}
       <button id="dailyScores">Today's Scores</button>
       <button id="allScores">All-Time Scores</button>
     </div>
-    <button id="plusInfo" class="plus-button">👊 NUMBER PUNCH PLUS · $2.99 CAD ONCE</button>
+    <button id="plusInfo" class="plus-button">👊 NUMBER PUNCH PLUS · $4.99 CAD ONCE</button>
   </div>
 </section>
 
 <section id="plus" class="hidden">
   <div class="card">
     <h2>👊 Number Punch Plus</h2>
-    <p class="note">Planned one-time purchase: $2.99 CAD. Plus removes between-round ads and adds themes, avatars, and enhanced personal stats. Everyone plays by the same scoring rules.</p>
+    <p class="note">Planned one-time purchase: $4.99 CAD. Easy is free; Plus unlocks Medium and Hard, removes between-round ads, and adds themes, avatars, and enhanced personal stats. Everyone plays by the same scoring rules.</p>
     <p class="note">Plus purchases are not available in this test version. The purchase will be added when the store version is set up.</p>
     <button id="plusBack" style="width:100%">Back to Home</button>
   </div>
@@ -298,6 +298,7 @@ padding:24px 18px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.45)}
   $('continue').onclick=()=> $('overlay').classList.add('hidden');
 
   function start(mode){
+    if(mode==='practice' && selectedMaxNumber!==15){show(plus);return}
     if(timer)clearInterval(timer);
     const thisRound=++roundId;
     pictureIndex=(pictureIndex+1)%pictures.length;
@@ -411,8 +412,7 @@ padding:24px 18px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.45)}
   $('plusBack').onclick=()=>show(home);
   $('daily').onclick=()=>start('daily');
   $('practice').onclick=()=>{
-selectedMaxNumber=document.getElementById('easy').classList.contains('selected')?
-15:document.getElementById('medium').classList.contains('selected')?19:23;
+selectedMaxNumber=15;
 start('practice');};
   $('exit').onclick=()=>{roundId++;if(timer)clearInterval(timer);$('message').classList.remove('countdown');show(home)};
   $('again').onclick=()=>start(lastMode);
@@ -426,16 +426,12 @@ document.querySelectorAll('#difficulty button').forEach(b=>b.classList.remove('s
 document.getElementById('easy').classList.add('selected');
 }; 
 document.getElementById('medium').onclick = function() {
-document.querySelectorAll('#difficulty button').forEach(b=>b.classList.remove('selected'));
-document.getElementById('medium').classList.add('selected');
-selectedMaxNumber = 19;
-document.getElementById('next').textContent = '1 / 19';
+document.getElementById('plus').classList.remove('hidden');
+document.getElementById('home').classList.add('hidden');
 };
 document.getElementById('hard').onclick = function() {
-selectedMaxNumber = 23;
-document.getElementById('next').textContent = '1 / 23';
-document.querySelectorAll('#difficulty button').forEach(b=>b.classList.remove('selected'));
-document.getElementById('hard').classList.add('selected');
+document.getElementById('plus').classList.remove('hidden');
+document.getElementById('home').classList.add('hidden');
 };
 
 
