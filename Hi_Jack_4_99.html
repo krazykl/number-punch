@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#10141b">
+<title>Hi Jack</title>
+<style>
+:root{
+  --bg:#10141b;--panel:#1b2430;--gold:#f4c542;--red:#d83a3a;--white:#f7f7f3;
+  --green:#176b43;--muted:#aab4c0;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;min-height:100vh;background:radial-gradient(circle at top,#263445 0,#10141b 55%);
+  color:var(--white);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  display:flex;justify-content:center;
+}
+.app{width:min(100%,760px);padding:18px 14px 34px}
+header{text-align:center;margin-bottom:12px}
+h1{font-size:clamp(38px,9vw,68px);line-height:.95;margin:8px 0 4px;letter-spacing:-2px}
+h1 span{color:var(--gold)}
+.tag{color:var(--muted);font-weight:700;letter-spacing:.5px}
+.controls,.status{
+  background:rgba(27,36,48,.92);border:1px solid #344356;border-radius:18px;padding:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.25)
+}
+.controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0 10px}
+button{
+  border:0;border-radius:12px;padding:10px 14px;font-weight:800;font-size:15px;
+  background:#334155;color:white;cursor:pointer
+}
+button.active{background:var(--gold);color:#151515;transform:translateY(1px)}
+#newGame{background:var(--green)}
+.status{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin-bottom:12px}
+.stat b{display:block;font-size:22px;color:var(--gold)}
+.stat small{color:var(--muted)}
+#message{text-align:center;font-size:20px;font-weight:900;min-height:30px;margin:8px 0}
+#board{
+  display:grid;gap:8px;grid-template-columns:repeat(4,1fr);
+  perspective:1000px
+}
+.card{
+  aspect-ratio: .72;position:relative;transform-style:preserve-3d;transition:transform .28s ease;
+  cursor:pointer;user-select:none
+}
+.card.flipped,.card.found{transform:rotateY(180deg)}
+.face{
+  position:absolute;inset:0;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  backface-visibility:hidden;box-shadow:0 5px 12px rgba(0,0,0,.35);overflow:hidden
+}
+.back{
+  background:
+    linear-gradient(45deg,rgba(255,255,255,.08) 25%,transparent 25%,transparent 75%,rgba(255,255,255,.08) 75%),
+    linear-gradient(45deg,rgba(255,255,255,.08) 25%,#7c1820 25%,#7c1820 75%,rgba(255,255,255,.08) 75%);
+  background-size:14px 14px;background-position:0 0,7px 7px;border:3px solid #e7dfc7;
+}
+.back:after{content:"HJ";font-size:clamp(18px,5vw,34px);font-weight:1000;color:#fff;text-shadow:0 2px 3px #000}
+.front{transform:rotateY(180deg);background:#fff;color:#111;border:2px solid #ddd;flex-direction:column}
+.rank{font-size:clamp(20px,6vw,38px);font-weight:1000;line-height:.9}
+.suit{font-size:clamp(22px,6vw,40px)}
+.red{color:#c9252d}
+.card.found .front{outline:4px solid var(--gold);outline-offset:-4px;animation:pulse .65s ease}
+@keyframes pulse{50%{transform:rotateY(180deg) scale(1.08)}}
+#board.shuffling{animation:shuffle .55s ease}
+@keyframes shuffle{25%{transform:translateX(-8px) rotate(-1deg)}50%{transform:translateX(9px) rotate(1deg)}75%{transform:translateX(-5px)}}
+.win{
+  position:fixed;inset:0;background:rgba(7,10,14,.88);display:none;align-items:center;justify-content:center;
+  z-index:10;padding:24px;text-align:center
+}
+.win.show{display:flex}
+.winbox{background:#1b2430;border:2px solid var(--gold);border-radius:24px;padding:28px;max-width:420px;width:100%}
+.winbox h2{font-size:48px;margin:0;color:var(--gold)}
+.winbox p{font-size:20px}
+.note{text-align:center;color:var(--muted);font-size:12px;margin-top:12px}
+.plus-button{display:block;margin:12px auto;background:var(--gold);color:#151515}
+.plus-info{max-width:560px;margin:12px auto;padding:16px;border:2px solid var(--gold);border-radius:16px;background:var(--panel);text-align:center}
+.plus-info[hidden]{display:none}
+@media(min-width:600px){#board{grid-template-columns:repeat(8,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <h1>HI <span>JACK!</span> 🃏</h1>
+  <div class="tag">Find all four Jacks before the shuffle fools you.</div>
+</header>
+
+<div class="controls">
+  <button data-diff="easy" class="active">Easy · Free</button>
+  <button data-diff="medium">🔒 Medium · Plus</button>
+  <button data-diff="hard">🔒 Hard · Plus</button>
+  <button data-diff="expert">🔒 Expert · Plus</button>
+  <button id="newGame">New Game</button>
+</div>
+<button id="plusButton" class="plus-button">HI JACK PLUS · $4.99 CAD ONCE</button>
+<div id="plusInfo" class="plus-info" hidden>
+  <strong>Hi Jack Plus · $4.99 CAD once</strong>
+  <p>Easy is free. Plus will unlock Medium, Hard, and Expert.</p>
+  <p>Purchases are not available in this test version.</p>
+  <button id="plusClose">Back to Game</button>
+</div>
+
+<div class="status">
+  <div class="stat"><b id="jacks">0/4</b><small>Jacks Found</small></div>
+  <div class="stat"><b id="timer">0.0</b><small>Seconds</small></div>
+  <div class="stat"><b id="picks">0</b><small>Picks</small></div>
+</div>
+
+<div id="message">Tap a card to start!</div>
+<div id="board"></div>
+<div class="note" id="ruleNote"></div>
+</div>
+
+<div class="win" id="win">
+ <div class="winbox">
+   <h2>HI JACK! 🎉</h2>
+   <p id="result"></p>
+   <button id="again">Play Again</button>
+ </div>
+</div>
+
+<script>
+const suits = [
+  {s:'♠',red:false},{s:'♥',red:true},{s:'♦',red:true},{s:'♣',red:false}
+];
+const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const settings = {
+  easy:{cards:16,shuffleEvery:8},
+  medium:{cards:28,shuffleEvery:6},
+  hard:{cards:40,shuffleEvery:4},
+  expert:{cards:52,shuffleEvery:3}
+};
+let difficulty='easy', cards=[], found=0, picks=0, sinceShuffle=0, started=false, finished=false, startTime=0, timerInt=null, locked=false;
+
+const board=document.getElementById('board'), msg=document.getElementById('message');
+const jacksEl=document.getElementById('jacks'), timerEl=document.getElementById('timer'), picksEl=document.getElementById('picks');
+const win=document.getElementById('win'), result=document.getElementById('result'), ruleNote=document.getElementById('ruleNote');
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+  return a;
+}
+function makeDeck(){
+  const full=[];
+  suits.forEach(s=>ranks.forEach(r=>full.push({rank:r,suit:s.s,red:s.red,id:r+s.s,found:false})));
+  const jackCards=full.filter(c=>c.rank==='J');
+  const others=shuffle(full.filter(c=>c.rank!=='J')).slice(0,settings[difficulty].cards-4);
+  return shuffle([...jackCards,...others]);
+}
+function render(){
+  board.innerHTML='';
+  cards.forEach((c,i)=>{
+    const el=document.createElement('div');
+    el.className='card'+(c.found?' found':'');
+    el.dataset.i=i;
+    el.innerHTML=`<div class="face back"></div><div class="face front ${c.red?'red':''}">
+      <div class="rank">${c.rank}</div><div class="suit">${c.suit}</div></div>`;
+    el.addEventListener('click',()=>pick(i,el));
+    board.appendChild(el);
+  });
+}
+function startTimer(){
+  if(started)return;
+  started=true; startTime=performance.now();
+  timerInt=setInterval(()=>timerEl.textContent=((performance.now()-startTime)/1000).toFixed(1),100);
+}
+function pick(i,el){
+  if(locked||finished||cards[i].found)return;
+  startTimer(); locked=true; picks++; sinceShuffle++; picksEl.textContent=picks;
+  el.classList.add('flipped');
+  const isJack=cards[i].rank==='J';
+  if(isJack){
+    cards[i].found=true; found++; jacksEl.textContent=found+'/4';
+    msg.textContent=`Jack found! ${found}/4 🃏`;
+  } else {
+    msg.textContent=`${cards[i].rank}${cards[i].suit} — keep hunting!`;
+  }
+
+  setTimeout(()=>{
+    if(isJack) el.classList.add('found');
+    else el.classList.remove('flipped');
+
+    if(found===4){ finish(); locked=false; return; }
+
+    if(sinceShuffle>=settings[difficulty].shuffleEvery){
+      sinceShuffle=0;
+      setTimeout(doShuffle,250);
+    } else locked=false;
+  },650);
+}
+function doShuffle(){
+  msg.textContent='SHUFFLE! 🔀';
+  board.classList.add('shuffling');
+  const foundCards=cards.filter(c=>c.found);
+  const remaining=shuffle(cards.filter(c=>!c.found));
+  cards=shuffle([...foundCards,...remaining]);
+  setTimeout(()=>{render();board.classList.remove('shuffling');msg.textContent='Positions changed — find the Jacks!';locked=false},550);
+}
+function finish(){
+  finished=true; clearInterval(timerInt);
+  const secs=((performance.now()-startTime)/1000).toFixed(1);
+  timerEl.textContent=secs;
+  result.textContent=`You found all four Jacks in ${secs} seconds with ${picks} picks.`;
+  msg.textContent='HI JACK! 🎉';
+  setTimeout(()=>win.classList.add('show'),350);
+}
+function newGame(){
+  clearInterval(timerInt); found=0;picks=0;sinceShuffle=0;started=false;finished=false;locked=false;startTime=0;
+  jacksEl.textContent='0/4';timerEl.textContent='0.0';picksEl.textContent='0';msg.textContent='Tap a card to start!';
+  win.classList.remove('show'); cards=makeDeck();render();
+  const s=settings[difficulty];
+  ruleNote.textContent=`${difficulty[0].toUpperCase()+difficulty.slice(1)}: ${s.cards} cards • deck shuffles after every ${s.shuffleEvery} picks`;
+}
+document.querySelectorAll('[data-diff]').forEach(b=>b.addEventListener('click',()=>{
+  if(b.dataset.diff!=='easy'){
+    document.getElementById('plusInfo').hidden=false;
+    return;
+  }
+  difficulty=b.dataset.diff;
+  document.querySelectorAll('[data-diff]').forEach(x=>x.classList.toggle('active',x===b));
+  newGame();
+}));
+document.getElementById('plusButton').onclick=()=>document.getElementById('plusInfo').hidden=false;
+document.getElementById('plusClose').onclick=()=>document.getElementById('plusInfo').hidden=true;
+document.getElementById('newGame').onclick=newGame;
+document.getElementById('again').onclick=newGame;
+newGame();
+</script>
+</body>
+</html>
