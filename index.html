@@ -67,6 +67,13 @@ padding:24px 18px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.45)}
 .tile.solved{opacity:0;pointer-events:none}
 .tile.solved{opacity:1;pointer-events:none;color:transparent;background:#112b49}
 .tile.solved.picture-revealed{background-color:#183b55;background-repeat:no-repeat;border-color:#52758c}
+.punch-fist{position:absolute;z-index:4;display:grid;place-items:center;pointer-events:none;
+  font-size:clamp(30px,9vw,56px);line-height:1;transform:translate(-50%,-50%);
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.7));animation:punch-hit .32s ease-out both}
+@keyframes punch-hit{0%{opacity:0;transform:translate(-50%,-95%) scale(1.5)}
+  45%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(.8)}}
+@media (prefers-reduced-motion:reduce){.punch-fist{animation:none;opacity:1}}
 #message.countdown {
   position: fixed !important;
   top: 50%;
@@ -288,14 +295,25 @@ padding:24px 18px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.45)}
   function show(x){[home,game,results,leaderboard,plus].forEach(v=>v.classList.add('hidden'));x.classList.remove('hidden')}
   function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
   function fmt(ms){const t=ms/1000,m=Math.floor(t/60),r=(t%60).toFixed(1).padStart(4,'0');return String(m).padStart(2,'0')+':'+r}
-  function elapsed(){return Math.max(0,(state.done?state.ended:performance.now())-state.start-state.frozenMs-(state.freezeStart?Math.min(3000,performance.now()-state.freezeStart):0))}
+  function elapsed(){const now=state.done?state.ended:performance.now();return Math.max(0,(state.pausedAt||now)-state.start-state.pausedMs-state.frozenMs-(state.freezeStart?Math.min(3000,(state.pausedAt||now)-state.freezeStart):0))}
   function currentScore(){return Math.max(0,Math.round(10000-elapsed()/1000*50-state.wrong*100+state.delta))}
   function hud(){if(!state||state.done)return;$('time').textContent=fmt(elapsed());$('score').textContent=currentScore().toLocaleString()}
 
-  function popup(icon,title,effect){
+  let afterPopup=null;
+  function popup(icon,title,effect,onDismiss=null){
+    state.pausedAt=performance.now();
+    afterPopup=onDismiss;
     $('icon').textContent=icon;$('title').textContent=title;$('effect').textContent=effect;$('overlay').classList.remove('hidden');
   }
-  $('continue').onclick=()=> $('overlay').classList.add('hidden');
+  $('continue').onclick=()=>{
+    if($('overlay').classList.contains('hidden'))return;
+    state.pausedMs+=performance.now()-state.pausedAt;
+    state.pausedAt=0;
+    $('overlay').classList.add('hidden');
+    const resume=afterPopup;afterPopup=null;
+    if(resume)resume();
+    hud();
+  };
 
   function start(mode){
     if(mode==='practice' && selectedMaxNumber!==15){show(plus);return}
@@ -307,7 +325,7 @@ padding:24px 18px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.45)}
     lastMode=mode;
     if(mode==='daily')selectedMaxNumber=15;
     const vals=mode==='daily'?dailyTiles():shuffle([...Array.from({length:selectedMaxNumber},(_,i)=>i+1),'★']);
-    state={mode,max:selectedMaxNumber,start:performance.now(),next:1,wrong:0,delta:0,frozenMs:0,freezeStart:0,mysteryUsed:false,done:false,ended:0};
+    state={mode,max:selectedMaxNumber,start:performance.now(),next:1,wrong:0,delta:0,frozenMs:0,freezeStart:0,pausedAt:0,pausedMs:0,mysteryUsed:false,done:false,ended:0};
     $('mode').textContent=mode==='daily'?'Daily Challenge':'Practice Mode';
     $('next').textContent='1 / '+selectedMaxNumber;$('wrong').textContent='0';$('mystery').textContent='Ready';$('message').textContent='Find number 1.';
     board.innerHTML='';
@@ -343,6 +361,15 @@ padding:24px 18px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.45)}
     setTimeout(()=>{if(!b.classList.contains('solved')){b.textContent='';b.classList.remove('flash')}},ms);
   }
 
+  function punch(b){
+    const fist=document.createElement('span'),tile=b.getBoundingClientRect(),wrap=board.parentElement,area=wrap.getBoundingClientRect();
+    fist.className='punch-fist';fist.textContent='👊';fist.setAttribute('aria-hidden','true');
+    fist.style.left=tile.left-area.left+tile.width/2+'px';
+    fist.style.top=tile.top-area.top+tile.height/2+'px';
+    wrap.appendChild(fist);
+    setTimeout(()=>fist.remove(),340);
+  }
+
   function playBell(){
     if(!soundOn)return;
     playTapSound(true);
@@ -361,17 +388,20 @@ padding:24px 18px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.45)}
     } else if(e==='reveal'){
       const targets=[...board.children].filter(x=>!x.classList.contains('solved')&&x.dataset.v!=='★')
         .sort((a,b)=>Number(a.dataset.v)-Number(b.dataset.v)).slice(0,2);
-      targets.forEach(x=>flash(x,x.dataset.v,2200));playCue('reveal');
-      popup('👀','REVEAL TWO TILES','The next two numbers are shown briefly.');
+      playCue('reveal');
+      popup('👀','REVEAL TWO TILES','The next two numbers will show when you keep playing.',()=>targets.forEach(x=>flash(x,x.dataset.v,2200)));
     } else if(e==='shuffle'){
       const tiles=[...board.children].filter(x=>!x.classList.contains('solved')&&x.dataset.v!=='★');
       const values=shuffle(tiles.map(x=>x.dataset.v));
       tiles.forEach((tile,i)=>{tile.dataset.v=values[i];tile.textContent='';tile.classList.remove('flash');tile.onclick=()=>tap(tile,tile.dataset.v)});
       playCue('shuffle');popup('🔀','TILES SHUFFLED','The remaining hidden numbers moved to new positions.');
     } else {
-      state.freezeStart=performance.now();playCue('freeze');
-      setTimeout(()=>{if(state&&!state.done&&state.freezeStart){state.frozenMs+=Math.min(3000,performance.now()-state.freezeStart);state.freezeStart=0;hud()}},3000);
-      popup('❄️','TIME FROZEN','The timer and score countdown pause for three seconds.');
+      playCue('freeze');
+      popup('❄️','TIME FROZEN','After you keep playing, the timer pauses for three seconds.',()=>{
+        const activeRound=state;
+        activeRound.freezeStart=performance.now();
+        setTimeout(()=>{if(state===activeRound&&!state.done&&state.freezeStart){state.frozenMs+=Math.min(3000,performance.now()-state.freezeStart);state.freezeStart=0;hud()}},3000);
+      });
     }
     $('message').textContent='Mystery Tile: '+e+'. Find '+state.next+'.';
     hud();
@@ -386,18 +416,23 @@ padding:24px 18px;text-align:center;box-shadow:0 18px 60px rgba(0,0,0,.45)}
     }
     if(Number(v)===state.next){
       playTapSound(true);
+      punch(b);
       b.textContent=v;b.classList.add('solved');revealTile(b);state.next++;
-      if(state.next>selectedMaxNumber)finish();
+      if(state.next>selectedMaxNumber){
+        const solvedAt=performance.now();board.style.pointerEvents='none';
+        setTimeout(()=>finish(solvedAt),340);
+      }
       else{$('next').textContent=state.next+' /'+ selectedMaxNumber;$('message').textContent='Good! Now find '+state.next+'.'}
     } else {
       playTapSound(false);
+      punch(b);
       flash(b,v);
       state.wrong++;$('wrong').textContent=state.wrong;$('message').textContent='Wrong tile. Find '+state.next+'.';
     }
   }
 
-  function finish(){
-    state.ended=performance.now();state.done=true;if(timer)clearInterval(timer);playCue('finish');
+  function finish(solvedAt=performance.now()){
+    state.ended=solvedAt;state.done=true;if(timer)clearInterval(timer);playCue('finish');
     $('finalScore').textContent=currentScore().toLocaleString();
     $('finalTime').textContent=fmt(elapsed());
     $('finalWrong').textContent=state.wrong;
