@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#77c9ff">
+<title>Barn Carnival</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+button{font:inherit}
+:root{--wood:#8b5129;--woodDark:#563119;--gold:#ffd85a;--hud:#151d28;--red:#d53c33;--green:#3b9447}
+.screen{position:absolute;inset:0;display:none}.screen.active{display:block}
+#rotate{position:fixed;inset:0;z-index:10000;background:#0e131a;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;font-size:28px;font-weight:900}
+#rotate .box{max-width:560px;padding:30px;background:#18212d;border:2px solid #3a4b60;border-radius:24px}
+@media(orientation:portrait){#rotate{display:flex}}
+.farm{position:absolute;inset:0;background:linear-gradient(#7ecdf9 0 57%,#76bf53 57% 100%);overflow:hidden}
+.sun{position:absolute;right:8%;top:7%;width:72px;height:72px;border-radius:50%;background:#ffe676;box-shadow:0 0 26px #ffe67699}
+.cloud{position:absolute;font-size:50px;opacity:.9;animation:cloud 30s linear infinite}.c1{top:10%;left:-15%}.c2{top:22%;left:-35%;animation-duration:40s}
+@keyframes cloud{to{transform:translateX(145vw)}}
+.barn{position:absolute;left:6%;bottom:18%;width:26%;min-width:210px;height:39%;min-height:180px;background:#bd3d33;border:6px solid #792920;border-radius:8px}
+.barn:before{content:"";position:absolute;left:-6px;right:-6px;top:-27%;height:34%;background:#812e26;clip-path:polygon(50% 0,100% 100%,0 100%)}
+.door{position:absolute;left:29%;bottom:0;width:42%;height:57%;background:#8f2b22;border:5px solid #f2dfb5}
+.door:after{content:"X";position:absolute;inset:0;display:grid;place-items:center;color:#f2dfb5;font-size:64px;font-weight:1000}
+.fence{position:absolute;left:0;right:0;bottom:15%;height:13%;border-top:10px solid #ead4a6;border-bottom:10px solid #ead4a6}
+.fence:after{content:"";position:absolute;left:0;right:0;top:44%;border-top:8px solid #ead4a6}
+.animals{position:absolute;left:39%;right:3%;bottom:16%;height:20%;display:flex;justify-content:space-around;align-items:end;font-size:42px;filter:drop-shadow(0 3px 2px #0004)}
+.animals span{animation:bob 2.4s ease-in-out infinite alternate}.animals span:nth-child(2){animation-delay:.4s}.animals span:nth-child(3){animation-delay:.8s}.animals span:nth-child(4){animation-delay:1.2s}.animals span:nth-child(5){animation-delay:1.6s}
+@keyframes bob{to{transform:translateY(-6px) rotate(2deg)}}
+.logo{position:absolute;z-index:5;top:4%;left:50%;transform:translateX(-50%);width:90%;text-align:center}
+.logo h1{margin:0;font-size:clamp(38px,7vw,80px);font-weight:1000;color:#ffeab1;-webkit-text-stroke:2px #60381c;text-shadow:0 5px 0 #60381c,0 10px 18px #0005}
+.bullseye{display:inline-block;width:72px;height:72px;border-radius:50%;vertical-align:middle;margin-left:10px;border:5px solid #60381c;background:radial-gradient(circle,#fff 0 18%,#d73430 18% 36%,#fff 36% 56%,#d73430 56% 100%);transform:rotate(-8deg)}
+.menu{position:absolute;z-index:7;left:50%;top:51%;transform:translate(-50%,-50%);width:min(86vw,760px);display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.wood{border:none;border-radius:15px;padding:15px 14px;background:linear-gradient(#a96939,#7a431f);border:4px solid var(--woodDark);color:#fff4d4;font-weight:1000;box-shadow:0 7px 0 #432612,0 11px 18px #0005;text-shadow:0 2px 0 #0006}
+.wood:active{transform:translateY(5px);box-shadow:0 2px 0 #432612}.wood.easy{background:linear-gradient(#53a85d,#357d41)}.wood.plus{background:linear-gradient(#ce8a34,#9a5b1a)}.wide{grid-column:1/-1}
+.best{position:absolute;z-index:7;bottom:2.5%;left:50%;transform:translateX(-50%);width:min(92vw,820px);display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.best>div{background:#17202ee8;border:2px solid #ffffff31;border-radius:14px;padding:9px;text-align:center;font-weight:900}.best small{display:block;opacity:.75;font-weight:700}
+.panelScreen{background:linear-gradient(#7ecdf9,#76bf53);overflow:auto;padding:18px}
+.panel{max-width:840px;margin:18px auto;padding:22px;background:#17202ee8;border:2px solid #ffffff32;border-radius:22px;box-shadow:0 16px 44px #0005}
+.panel h1,.panel h2{text-align:center;color:#ffe49a}.panel p,.panel li{line-height:1.5}
+.row{display:flex;flex-wrap:wrap;gap:11px;justify-content:center}.notice{padding:10px 13px;border-radius:12px;background:#0d1622cc;border:1px solid #ffffff32;text-align:center}
+.tabs{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}.tab{border:none;border-radius:11px;padding:9px 13px;background:#33465c;color:white;font-weight:900}.tab.on{background:#ad6628}
+.benefits{display:grid;gap:8px;margin:14px 0}.benefit{padding:10px 12px;border-radius:11px;background:#ffffff10}
+#hud{position:absolute;z-index:40;left:0;right:0;top:0;height:66px;background:#111925f2;display:grid;grid-template-columns:105px 82px 1fr 102px 92px;gap:7px;align-items:center;padding:7px;border-bottom:2px solid #ffffff20}
+.hud{border:none;border-radius:10px;padding:8px;background:#ffffff12;border:1px solid #ffffff27;color:#fff;text-align:center;font-weight:1000}#shoot{color:#ffe581;font-size:clamp(15px,2.2vw,27px)}
+#timer.red{color:#ff4a4a}#timer.flash{animation:flash .45s linear infinite alternate}@keyframes flash{to{opacity:.25}}
+#field{position:absolute;inset:66px 0 0 0;overflow:hidden}
+.target{position:absolute;width:72px;height:72px;display:grid;place-items:center;user-select:none;touch-action:none;filter:drop-shadow(0 4px 2px #0004)}
+.target .icon{font-size:clamp(38px,6vw,64px)}.target.used{pointer-events:none}
+.mark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:39px;pointer-events:none}.bad{color:#ff3232;font-size:45px;font-weight:1000;text-shadow:0 2px 3px #000}
+#cross{position:absolute;z-index:50;width:48px;height:48px;border:3px solid white;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;left:50%;top:55%;box-shadow:0 0 6px #0008}
+#cross:before,#cross:after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:white}#cross:before{width:65px;height:3px}#cross:after{height:65px;width:3px}
+#cross.hot{border-color:#ffd72e}#cross.hot:before,#cross.hot:after{background:#ffd72e}
+#gun{position:absolute;z-index:46;bottom:-8px;left:50%;transform:translateX(-50%);font-size:72px;pointer-events:none;transform-origin:50% 100%}#gun.kick{animation:kick .13s}@keyframes kick{50%{transform:translateX(-50%) translateY(9px) rotate(-4deg)}}
+#center{position:absolute;z-index:90;left:50%;top:47%;transform:translate(-50%,-50%);font-size:clamp(46px,10vw,110px);font-weight:1000;text-shadow:0 6px 18px #000;pointer-events:none}
+.banner{position:absolute;z-index:90;left:50%;transform:translateX(-50%);top:78px;padding:9px 17px;border-radius:11px;background:#121d2bec;font-weight:1000;font-size:23px;display:none;white-space:nowrap}.gold{color:#ffe15f}#wolfBanner{top:124px}
+#reload{position:absolute;z-index:90;right:18px;bottom:18px;width:72px;height:72px;border:8px solid #ffffff35;border-top-color:#ffe263;border-radius:50%;display:none;animation:spin .6s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.results{display:grid;grid-template-columns:1fr 1fr;gap:10px}.results div{padding:11px;border-radius:10px;background:#ffffff11}.ad{text-align:center;font-size:31px;padding:45px 20px}
+#toast{position:fixed;z-index:999;left:50%;bottom:20px;transform:translateX(-50%);display:none;padding:11px 15px;border-radius:12px;background:#101820ec;border:1px solid #ffffff36}
+@media(max-width:760px){#hud{height:59px;grid-template-columns:88px 70px 1fr 88px 78px;font-size:12px;padding:5px}#field{inset:59px 0 0}.menu{gap:9px}.wood{padding:10px 8px}.logo{top:2%}.animals{font-size:33px}.best{bottom:1.5%}}
+</style>
+</head>
+<body>
+<div id="rotate"><div class="box">📱↔️<br><br>Rotate your phone to play</div></div>
+
+<section id="menuScreen" class="screen active">
+<div class="farm"><div class="sun"></div><div class="cloud c1">☁️</div><div class="cloud c2">☁️</div><div class="barn"><div class="door"></div></div><div class="fence"></div><div class="animals"><span>🐄</span><span>🐖</span><span>🐐</span><span>🐕</span><span>🐓</span></div></div>
+<div class="logo"><h1>Barn Carnival <span class="bullseye"></span></h1></div>
+<div class="menu">
+<button id="easyBtn" class="wood easy">Easy</button>
+<button id="hardBtn" class="wood plus">Hard — PLUS</button>
+<button id="howBtn" class="wood">How to Play</button>
+<button id="soundBtn" class="wood">Sound: On</button>
+<button id="leaderBtn" class="wood wide" style="display:none">Leaderboards</button>
+<button id="restoreBtn" class="wood wide">Restore Purchase</button>
+</div>
+<div class="best"><div>Easy Personal Best <strong id="easyBest">0</strong><small>coins</small></div><div id="hardCard">Hard Personal Best <strong id="hardBest">0</strong><small id="hardSub">Buy Plus to unlock</small></div></div>
+</section>
+
+<section id="purchaseScreen" class="screen panelScreen"><div class="panel">
+<h1>Barn Carnival Plus</h1>
+<div class="benefits">
+<div class="benefit">⏱️ 90-second Hard rounds</div><div class="benefit">🎯 15-shot magazine / 1.5 sec auto-reload</div><div class="benefit">🐎 Hard-only horseshoes and wagon wheels</div><div class="benefit">🐺 Special wolf rescue event</div><div class="benefit">⚡ Faster and more unpredictable target movement</div><div class="benefit">🏆 Separate Hard Daily and All-Time leaderboards</div><div class="benefit">🚫 No between-round ads anywhere, including Easy</div>
+</div>
+<div class="row"><button id="buyBtn" class="wood plus">TEST BUY — $4.99 CAD</button><button id="purchaseBack" class="wood">Back</button></div>
+<p class="notice">Development build only. This button simulates a successful store purchase. No real money is charged.</p>
+</div></section>
+
+<section id="howScreen" class="screen panelScreen"><div class="panel">
+<h1>How to Play</h1>
+<div class="tabs"><button class="tab on" data-tab="basics">Basics</button><button class="tab" data-tab="scoring">Scoring</button><button class="tab" data-tab="bonuses">Bonuses</button><button class="tab" data-tab="hard">Hard Mode</button></div>
+<div id="howBody"></div><div class="row"><button id="howBack" class="wood">Back to Main Menu</button></div>
+</div></section>
+
+<section id="leadersScreen" class="screen panelScreen"><div class="panel">
+<h1>Leaderboards</h1><p class="notice">Firebase is not connected in this first build yet. Space is reserved for Easy Daily, Easy All-Time, Hard Daily, and Hard All-Time.</p>
+<div class="row"><button id="leadersBack" class="wood">Back to Main Menu</button></div>
+</div></section>
+
+<section id="gameScreen" class="screen">
+<div id="hud"><div class="hud">🪙 <span id="coins">0</span></div><div id="timer" class="hud">60</div><div id="shoot" class="hud">SHOOT: TIN CANS</div><button id="gameSound" class="hud">Sound On</button><button id="exitBtn" class="hud">Exit</button></div>
+<div id="field" class="farm"><div class="sun"></div><div class="barn"><div class="door"></div></div><div class="fence"></div><div class="animals"><span>🐄</span><span>🐖</span><span>🐑</span><span>🐎</span><span>🦆</span></div><div id="cross"></div><div id="gun">🔫</div><div id="reload"></div></div>
+<div id="center"></div><div id="comboBanner" class="banner gold"></div><div id="newBanner" class="banner gold">NEW TARGET!</div><div id="wolfBanner" class="banner gold">WOLF!</div>
+</section>
+
+<section id="resultsScreen" class="screen panelScreen"><div class="panel">
+<h1 id="resultsTitle">Round Results</h1><div class="results"><div>Total Coins<br><strong id="rCoins">0</strong></div><div>Correct Targets<br><strong id="rCorrect">0</strong></div><div>Wrong Targets<br><strong id="rWrong">0</strong></div><div>Best Combo<br><strong id="rCombo">0</strong></div><div>Bonus Targets<br><strong id="rBonus">0</strong></div><div id="wolfBox">Wolf Rescues<br><strong id="rWolf">0</strong></div></div>
+<p id="pbMsg" class="notice"></p><div class="row"><button id="againBtn" class="wood easy">Play Again</button><button id="menuBtn" class="wood">Main Menu</button><button id="shareBtn" class="wood">Share Score</button></div>
+</div></section>
+
+<section id="adScreen" class="screen panelScreen"><div class="panel ad"><div>TEST INTERSTITIAL AD</div><p style="font-size:16px;opacity:.75">Free Easy mode: shown after every second fully completed round.</p><button id="adClose" class="wood">Continue</button></div></section>
+<div id="toast"></div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const screens=[...document.querySelectorAll('.screen')];
+const K={plus:'BC_plus_test',easyBest:'BC_easy_best',hardBest:'BC_hard_best',done:'BC_done',ad:'BC_easy_ad'};
+let sound=true,mode='easy',playing=false,countdown=false,timerRunning=false,reloading=false,timerLeft=60,elapsed=0,ammo=15;
+let coins=0,correct=0,wrong=0,bonus=0,wolf=0,combo=0,bestCombo=0,cycle=0,shots=0,reloads=0,current='can';
+let roundInterval=null,targetChangeTimer=null,maintainInterval=null,lastAim={x:innerWidth/2,y:innerHeight/2},targetId=0;
+const info={
+can:{label:'TIN CANS',icon:'🥫',value:20},
+wood:{label:'WOOD TARGETS',icon:'🎯',value:20},
+scare:{label:'SCARECROWS',icon:'🧑‍🌾',value:20},
+sign:{label:'HANGING SIGNS',icon:'🪧',value:20},
+horse:{label:'HORSESHOES',icon:'🧲',value:30,hard:true},
+wheel:{label:'WAGON WHEELS',icon:'🛞',value:30,hard:true}
+};
+function show(id){screens.forEach(s=>s.classList.remove('active'));$(id).classList.add('active')}
+function plus(){return localStorage.getItem(K.plus)==='1'}
+function setPlus(v){localStorage.setItem(K.plus,v?'1':'0');refreshMenu()}
+function refreshMenu(){
+$('easyBest').textContent=localStorage.getItem(K.easyBest)||'0';
+$('hardBest').textContent=localStorage.getItem(K.hardBest)||'0';
+$('hardSub').textContent=plus()?'coins':'Buy Plus to unlock';
+$('leaderBtn').style.display=(+localStorage.getItem(K.done)||0)>0?'block':'none';
+$('soundBtn').textContent='Sound: '+(sound?'On':'Off');
+}
+function toast(t,ms=1600){$('toast').textContent=t;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',ms)}
+function tone(f=500,d=.06,type='sine',g=.04){
+if(!sound)return;
+try{const ac=tone.ac||(tone.ac=new (window.AudioContext||window.webkitAudioContext)());const o=ac.createOscillator(),v=ac.createGain();o.type=type;o.frequency.value=f;v.gain.value=g;o.connect(v);v.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}
+}
+function toggleSound(){sound=!sound;$('soundBtn').textContent='Sound: '+(sound?'On':'Off');$('gameSound').textContent='Sound '+(sound?'On':'Off')}
+$('soundBtn').onclick=toggleSound;$('gameSound').onclick=toggleSound;
+$('easyBtn').onclick=()=>startRound('easy');
+$('hardBtn').onclick=()=>plus()?startRound('hard'):show('purchaseScreen');
+$('howBtn').onclick=()=>show('howScreen');$('leaderBtn').onclick=()=>show('leadersScreen');
+$('restoreBtn').onclick=()=>{setPlus(true);toast('TEST RESTORE complete — Plus unlocked')};
+$('hardCard').onclick=()=>{if(!plus())show('purchaseScreen')};
+$('buyBtn').onclick=()=>{setPlus(true);toast('TEST PURCHASE successful');setTimeout(()=>show('menuScreen'),650)};
+$('purchaseBack').onclick=$('howBack').onclick=$('leadersBack').onclick=()=>{refreshMenu();show('menuScreen')};
+
+const help={
+basics:`<h2>Basics</h2><p>Watch the centered <b>SHOOT:</b> instruction. Drag to aim and quick-tap to fire. The timer starts with your first shot, or automatically 3 seconds after GO.</p>`,
+scoring:`<h2>Scoring</h2><p>Regular correct target: <b>+20</b>. Hard-only horseshoe or wagon wheel: <b>+30</b>. Standard wrong target: <b>−50</b>. Wrong Hard-only target: <b>−30</b>. Coins never go below zero. Bottles and empty-space misses have no coin penalty.</p>`,
+bonuses:`<h2>Bonuses</h2><p>Raccoons and crows are worth <b>+50</b>. Easy awards <b>+500</b> for every 5 consecutive correct regular hits. Hard awards <b>+1000</b> for every 10. Hard wolf rescues are worth <b>+500</b>.</p>`,
+hard:`<h2>Hard Mode</h2><p>90 seconds, 15 shots per magazine, 1.5 second automatic reload, more targets, faster movement, horseshoes, wagon wheels, and the wolf rescue event. The main timer pauses during reload.</p>`
+};
+function helpTab(k){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===k));$('howBody').innerHTML=help[k]}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>helpTab(b.dataset.tab));helpTab('basics');
+
+function pickTarget(){
+const keys=Object.keys(info).filter(k=>mode==='hard'||!info[k].hard).filter(k=>k!==current);
+current=keys[Math.floor(Math.random()*keys.length)];$('shoot').textContent='SHOOT: '+info[current].label;
+}
+function clearTargets(){document.querySelectorAll('.target').forEach(e=>e.remove())}
+function rand(a,b){return a+Math.random()*(b-a)}
+function spawn(force=null,bonusKind=null){
+if(!playing)return null;
+const field=$('field'),rect=field.getBoundingClientRect(),e=document.createElement('div');e.className='target';e.dataset.id=++targetId;
+let kind=force;
+if(bonusKind){kind=bonusKind;e.dataset.bonus='1'}
+if(!kind){
+if(Math.random()<(mode==='easy'?.5:.3))kind=current;
+else{const choices=Object.keys(info).filter(k=>mode==='hard'||!info[k].hard).filter(k=>k!==current);kind=choices[Math.floor(Math.random()*choices.length)];if(Math.random()<.13)kind='bottle'}
+}
+e.dataset.kind=kind;
+const icon=kind==='raccoon'?'🦝':kind==='crow'?'🐦‍⬛':kind==='wolf'?'🐺':kind==='bottle'?'🍾':(info[kind]?.icon||'🎯');
+e.innerHTML=`<div class="icon">${icon}</div>`;
+const w=72,y=rand(12,Math.max(20,rect.height-145)),dir=Math.random()<.5?1:-1;let x=dir===1?-w:rect.width+w;
+e.style.left=x+'px';e.style.top=y+'px';field.appendChild(e);
+const base=mode==='easy'?rand(55,95):rand(85,140),speed=bonusKind?(bonusKind==='raccoon'?180:205):base*(1+Math.min(elapsed,60)/120);
+let pos=x,a=0,last=performance.now(),reverse=false;
+function move(now){
+if(!e.isConnected)return;
+const dt=(now-last)/1000;last=now;pos+=dir*speed*dt*(reverse?-1:1);a+=dt*2;
+if(kind==='raccoon')e.style.top=(y+Math.sin(a*3)*11)+'px';
+if(kind==='crow')e.style.top=(y+Math.sin(a)*42)+'px';
+e.style.left=pos+'px';
+if(!bonusKind&&!reverse&&Math.random()<.0012){reverse=true;setTimeout(()=>reverse=false,rand(500,1200))}
+if(pos>rect.width+w*2||pos<-w*2){e.remove();return}
+requestAnimationFrame(move)
+}requestAnimationFrame(move);return e;
+}
+function maintain(){
+if(!playing)return;
+const wanted=mode==='easy'?6:Math.min(9,7+Math.floor(elapsed/30));
+const count=[...document.querySelectorAll('.target:not([data-bonus="1"])')].length;
+for(let i=count;i<wanted;i++)spawn();
+}
+function hitUnder(x,y){
+const margin=22;
+const targets=[...document.querySelectorAll('.target:not(.used)')];
+let best=null,bestDist=Infinity;
+for(const e of targets){
+const r=e.getBoundingClientRect();
+if(x>=r.left-margin&&x<=r.right+margin&&y>=r.top-margin&&y<=r.bottom+margin){
+const cx=(r.left+r.right)/2,cy=(r.top+r.bottom)/2,d=(x-cx)*(x-cx)+(y-cy)*(y-cy);
+if(d<bestDist){best=e;bestDist=d}
+}
+}
+return best;
+}
+function aim(x,y){
+const r=$('field').getBoundingClientRect();x=Math.max(r.left,Math.min(r.right,x));y=Math.max(r.top,Math.min(r.bottom,y));lastAim={x,y};
+$('cross').style.left=(x-r.left)+'px';$('cross').style.top=(y-r.top)+'px';$('cross').classList.toggle('hot',!!hitUnder(x,y));
+}
+function mark(e,char,cls='mark',ms=0){const m=document.createElement('div');m.className=cls;m.textContent=char;e.appendChild(m);if(ms)setTimeout(()=>m.remove(),ms)}
+function score(n){coins=Math.max(0,coins+n);$('coins').textContent=coins}
+function comboCheck(){
+const need=mode==='easy'?5:10;
+if(cycle>=need){const n=mode==='easy'?500:1000;score(n);cycle=0;$('comboBanner').textContent=`${need} HIT COMBO! +${n}`;$('comboBanner').style.display='block';setTimeout(()=>$('comboBanner').style.display='none',1000)}
+}
+function resolve(e){
+if(e.classList.contains('used'))return;e.classList.add('used');const k=e.dataset.kind,isBonus=e.dataset.bonus==='1';
+if(k==='bottle'){mark(e,'💥');tone(880,.08,'triangle',.03);setTimeout(()=>e.remove(),220);return}
+if(k==='wolf'){wolf++;score(500);mark(e,'✨');tone(760,.12,'sine',.05);$('wolfBanner').textContent='CHICKENS SAVED!';$('wolfBanner').style.display='block';setTimeout(()=>$('wolfBanner').style.display='none',1200);setTimeout(()=>e.remove(),300);return}
+if(isBonus){bonus++;score(50);mark(e,'✨');tone(920,.08,'sine',.04);$('comboBanner').textContent='BONUS!';$('comboBanner').style.display='block';setTimeout(()=>$('comboBanner').style.display='none',700);setTimeout(()=>e.remove(),250);return}
+if(k===current){correct++;combo++;cycle++;bestCombo=Math.max(bestCombo,combo);score(info[k]?.value||20);mark(e,'🟢');tone(k==='wood'?430:620,.05,'triangle',.04);comboCheck();setTimeout(()=>e.remove(),280)}
+else{wrong++;combo=0;cycle=0;score(info[k]?.hard?-30:-50);mark(e,'✕','mark bad',500);tone(120,.08,'sawtooth',.035);setTimeout(()=>e.remove(),340)}
+}
+function fire(){
+if(!playing||countdown||reloading)return;
+if(mode==='hard'){if(ammo<=0)return;ammo--}shots++;
+$('gun').classList.remove('kick');void $('gun').offsetWidth;$('gun').classList.add('kick');tone(170,.045,'square',.04);
+if(!timerRunning)startTimer();const e=hitUnder(lastAim.x,lastAim.y);if(e)resolve(e);if(mode==='hard'&&ammo===0)reload();
+}
+function startTimer(){
+if(timerRunning)return;timerRunning=true;
+roundInterval=setInterval(()=>{if(reloading&&mode==='hard')return;timerLeft=Math.max(0,timerLeft-.1);elapsed+=.1;$('timer').textContent=Math.ceil(timerLeft);$('timer').classList.toggle('red',timerLeft<=10);$('timer').classList.toggle('flash',timerLeft<=5);if(timerLeft<=0)finish()},100);
+}
+function reload(){
+if(reloading)return;reloading=true;reloads++;$('reload').style.display='block';tone(250,.12,'square',.03);setTimeout(()=>{ammo=15;reloading=false;$('reload').style.display='none';tone(700,.05,'square',.03)},1500)
+}
+function changeTarget(){
+if(!playing)return;$('newBanner').style.display='block';setTimeout(()=>$('newBanner').style.display='none',700);pickTarget();document.querySelectorAll('.target:not([data-bonus="1"])').forEach(e=>e.remove());maintain()
+}
+function scheduleChanges(){
+const delay=mode==='easy'?10000:(7000+Math.random()*1000);targetChangeTimer=setTimeout(()=>{if(playing){changeTarget();scheduleChanges()}},delay)
+}
+function scheduleBonuses(){
+const times=mode==='easy'?[18,42]:[20,45,70];
+times.forEach((t,i)=>setTimeout(()=>{if(!playing)return;const k=Math.random()<.5?'raccoon':'crow';spawn(null,k);if(mode==='easy')tone(k==='crow'?900:520,.09,'sine',.04);const loop=mode==='easy'||Math.random()<.5;if(loop)setTimeout(()=>{if(playing){spawn(null,k);if(mode==='easy')tone(k==='crow'?900:520,.09,'sine',.04)}},3900)},t*1000));
+}
+function wolfEvent(){
+if(!playing)return;$('wolfBanner').textContent='WOLF!';$('wolfBanner').style.display='block';tone(95,.45,'sawtooth',.05);const e=spawn(null,'wolf');setTimeout(()=>{if(e&&e.isConnected){e.remove();$('wolfBanner').style.display='none'}},3000+(reloading?1500:0))
+}
+function scheduleWolf(){if(mode!=='hard')return;setTimeout(wolfEvent,43000);if(Math.random()<.25)setTimeout(wolfEvent,69000)}
+function startRound(m){
+mode=m;show('gameScreen');playing=true;countdown=true;timerRunning=false;reloading=false;timerLeft=m==='easy'?60:90;elapsed=0;ammo=15;
+coins=correct=wrong=bonus=wolf=combo=bestCombo=cycle=shots=reloads=0;current='can';
+$('coins').textContent='0';$('timer').textContent=timerLeft;$('timer').className='hud';$('shoot').textContent='SHOOT: '+info[current].label;$('gameSound').textContent='Sound '+(sound?'On':'Off');clearTargets();maintain();
+if(!navigator.onLine)toast("Offline — this round won’t count toward leaderboards",2200);
+let n=4;$('center').textContent=n;tone(480,.06,'square',.04);
+const c=setInterval(()=>{n--;if(n>0){$('center').textContent=n;tone(480,.06,'square',.04)}else{clearInterval(c);$('center').textContent='GO!';tone(830,.12,'square',.05);countdown=false;setTimeout(()=>$('center').textContent='',600);setTimeout(()=>{if(playing&&!timerRunning)startTimer()},3000)}},800);
+scheduleChanges();maintainInterval=setInterval(maintain,650);scheduleBonuses();scheduleWolf();
+}
+function finish(){
+if(!playing)return;playing=false;countdown=false;clearInterval(roundInterval);clearTimeout(targetChangeTimer);clearInterval(maintainInterval);$('center').textContent='TIME!';setTimeout(()=>{$('center').textContent='';results()},2000)
+}
+function results(){
+const done=(+localStorage.getItem(K.done)||0)+1;localStorage.setItem(K.done,done);
+const key=mode==='easy'?K.easyBest:K.hardBest,old=+localStorage.getItem(key)||0,isNew=coins>old;if(isNew)localStorage.setItem(key,coins);
+$('rCoins').textContent=coins;$('rCorrect').textContent=correct;$('rWrong').textContent=wrong;$('rCombo').textContent=bestCombo;$('rBonus').textContent=bonus;$('rWolf').textContent=wolf;$('wolfBox').style.display=mode==='hard'?'block':'none';$('resultsTitle').textContent=(mode==='easy'?'Easy':'Hard')+' Results';$('pbMsg').textContent=isNew?'NEW PERSONAL BEST!':'Personal Best: '+Math.max(old,coins);
+if(mode==='easy'&&!plus()){let c=(+localStorage.getItem(K.ad)||0)+1;if(c>=2){localStorage.setItem(K.ad,'0');show('adScreen');$('adClose').onclick=()=>show('resultsScreen')}else{localStorage.setItem(K.ad,String(c));show('resultsScreen')}}else show('resultsScreen');
+refreshMenu();tone(520,.08,'sine',.025)
+}
+function quit(){if(!playing){show('menuScreen');return}if(confirm('Exit this round?')){playing=false;clearInterval(roundInterval);clearTimeout(targetChangeTimer);clearInterval(maintainInterval);clearTargets();show('menuScreen')}}
+$('exitBtn').onclick=quit;$('againBtn').onclick=()=>startRound(mode);$('menuBtn').onclick=()=>{refreshMenu();show('menuScreen')};
+$('shareBtn').onclick=async()=>{const text=`I scored ${coins} coins in ${mode==='easy'?'Easy':'Hard'} mode with a best combo of ${bestCombo} in Barn Carnival! Think you can beat my score?`;try{if(navigator.share)await navigator.share({title:'Barn Carnival',text});else{await navigator.clipboard.writeText(text);toast('Score copied')}}catch(e){}};
+
+const field=$('field');
+field.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')aim(e.clientX,e.clientY)});
+field.addEventListener('pointerdown',e=>{aim(e.clientX,e.clientY);fire()});
+window.addEventListener('online',()=>toast('Back online'));window.addEventListener('offline',()=>toast('Offline'));
+refreshMenu();
+})();
+</script>
+</body>
+</html>
