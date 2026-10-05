@@ -1,0 +1,242 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Pic n Letters — Letter Readability Test</title><style>
+:root{--ink:#213643;--mint:#80d3bc;--paper:#f9f4e8;--peach:#ffd7a4}*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#cce8dc,#f7e7c8);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,sans-serif;min-height:100dvh}.wrap{max-width:1000px;margin:auto;padding:7px 12px 18px}header{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;min-height:34px;text-align:center}h1{font-size:clamp(22px,3vw,28px);margin:0}header p{margin:0;font-size:13px}button{font:inherit;border:0;cursor:pointer}button:focus-visible,.cell:focus-visible{outline:3px solid #184e7b;outline-offset:2px}.toolbar{display:flex;justify-content:center;flex-wrap:wrap;gap:7px;margin:6px 0 8px}.toolbar button,.action{padding:7px 11px;border-radius:13px;background:#205865;color:white;font-weight:700}.toolbar button.active{background:#a55442}.layout{max-width:900px;margin:auto}.play-area{display:grid;grid-template-columns:minmax(0,400px) minmax(170px,1fr);gap:16px;align-items:start}.play-area .grid,.play-area .scene{grid-column:1;grid-row:1}.play-area .sidebar{grid-column:2;grid-row:1}.play-area .words{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;margin:0;gap:8px}.play-area .word{text-align:center;overflow-wrap:anywhere;padding:3px 1px}[hidden]{display:none!important}.card{background:#fffef5d9;padding:9px;border:2px solid #ffffff;border-radius:20px;box-shadow:0 8px 28px #52705c22}.grid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;width:min(100%,400px);margin:auto}.cell{aspect-ratio:1;border-radius:9px;background:#f7fff7;border:2px solid #8ab9ae;color:#243b46;font-weight:800;font-size:clamp(13px,2.4vw,24px);box-shadow:0 2px #688d82;touch-action:manipulation}.cell.selected{background:#f8be81;border-color:#d27a48}.cell.found{background:#a8ddc6;border-color:#36967e}/* High-contrast, persistent clue: not just a brief shadow around a small cell. */
+.cell.hint:after{content:"▼";position:absolute;top:-20px;left:50%;transform:translateX(-50%);color:#a94f00;font-size:20px;text-shadow:0 0 2px white;pointer-events:none}.word.hint-word{background:#ffdc40;color:#182630;font-weight:900;border-radius:4px;outline:2px solid #bc6600}.cell.hint{background:#ffdc40!important;color:#17212b!important;border:3px solid #bd5500!important;box-shadow:inset 0 0 0 2px #fff,0 0 0 4px #ffad12,0 0 18px 6px #ffc529!important;position:relative;z-index:4;animation:hintPulse 1s ease-in-out infinite alternate}
+@keyframes hintPulse{from{filter:brightness(1)}to{filter:brightness(1.3)}}.words{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:13px 0}.word{background:none;padding:3px 1px;border-radius:0;font-weight:750;text-decoration:underline;text-underline-offset:3px}.word.done{text-decoration:line-through;opacity:.55}.current{text-align:center;min-height:31px;font-size:20px;font-weight:800;letter-spacing:3px}.controls{text-align:center}.controls button{margin:4px}.scene{position:relative;width:100%;height:clamp(260px,55vw,440px);border-radius:15px;overflow:hidden;background:linear-gradient(#b7dbef 0 58%,#7eb569 58% 100%);border:3px solid #dae7c5}.scene .sun{position:absolute;left:15%;top:14%;height:67px;width:67px;border-radius:50%;background:#ffe6a0;box-shadow:0 0 45px #fff7b0}.scene .hill{position:absolute;bottom:-50px;width:100%;height:175px;border-radius:50% 50% 0 0;background:#81b783}.scene .hill.two{left:35%;bottom:-75px;background:#53936f}.scene .illustration{position:absolute;inset:0;background-size:cover;background-position:center}.cover{position:absolute;background:linear-gradient(135deg,#416876,#2c4c5c);border:2px solid #daece4;transition:opacity .55s,transform .55s;z-index:2;display:grid;place-items:center;color:#b9d8d4;font-size:24px}.cover.gone{opacity:0;transform:scale(.6) rotate(10deg);pointer-events:none}.progress{font-weight:750;text-align:center;margin:10px 0}.notice{text-align:center;min-height:28px;font-weight:750;color:#8d4b3d}.small{text-align:center;font-size:13px;opacity:.75}.plus-note{text-align:center;font-size:13px;margin:8px 0 0;color:#285a61}.plus-note small{font-size:11px}.end{text-align:center;font-size:20px;font-weight:900;color:#267a68;min-height:28px}@media(max-width:740px){.play-area{grid-template-columns:1fr;gap:10px}.play-area .sidebar{grid-column:1;grid-row:1}.play-area .words{display:flex;flex-wrap:wrap;gap:5px}.play-area .word{padding:2px 1px;font-size:12px}.play-area .grid,.play-area .scene{grid-column:1;grid-row:2}.layout{grid-template-columns:1fr}.scene{height:225px}.wrap{padding:9px}.card{padding:10px}.grid{gap:3px}.cell{border-radius:6px}}
+
+/* Keep the word list and grid in separate rows at every difficulty. */
+.play-area{display:flex;flex-direction:column;align-items:center;gap:12px}
+.play-area .sidebar{width:100%;order:0}
+.play-area .grid,.play-area .scene{order:1;flex:none;max-width:100%}
+.play-area .words{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px}
+.play-area .word{flex:0 0 auto;padding:2px 1px}
+.grid{grid-template-columns:repeat(8,minmax(0,1fr))}
+.cell{min-width:0;padding:0;font-size:clamp(12px,2vw,22px)}
+@media(max-width:740px){.play-area .words{gap:5px 12px}.play-area .word{font-size:12px}}
+
+/* Desktop: stable board column and a single word column beside it. */
+.play-area{display:grid;grid-template-columns:minmax(0,1fr) 185px;gap:18px;align-items:start}
+.play-area .grid,.play-area .scene{grid-column:1;grid-row:1;order:initial;width:100%;max-width:500px;justify-self:start;min-width:0}
+.play-area .sidebar{grid-column:2;grid-row:1;order:initial;width:185px;min-width:0}
+.play-area .words{display:flex;flex-direction:column;align-items:flex-start;gap:3px;margin:0 0 10px}
+.play-area .word{display:block;text-align:left;flex:none;padding:1px 0;font-size:14px;line-height:1.15}
+.current{font-size:15px;letter-spacing:1px;overflow-wrap:anywhere}
+.controls button{padding:6px 8px;margin:2px;font-size:13px}
+.progress{font-size:13px}
+@media(max-width:600px){.play-area{grid-template-columns:minmax(0,1fr) 105px;gap:8px}.play-area .sidebar{width:105px}.play-area .word{font-size:11px}.current{font-size:12px}.controls button{font-size:11px;padding:4px 5px}.grid{gap:2px}.cell{font-size:clamp(10px,2vw,18px)}}
+
+/* Timed play: prevent looking at either the puzzle or its target words before GO. */
+.timerbar{display:flex;align-items:center;justify-content:center;gap:15px;flex-wrap:wrap;margin:10px auto;font-weight:800}.timerbar #clock{font-variant-numeric:tabular-nums;font-size:28px;color:#20545d}.timerbar button{background:#267a68;color:white;border:0;border-radius:9px;padding:10px 22px;font-weight:850}.play-area.locked .grid,.play-area.locked .words{visibility:hidden}.play-area.locked .controls{visibility:hidden}.play-area{position:relative}.game-countdown{position:absolute;z-index:10;inset:0;display:grid;place-items:center;background:#173c48e8;border-radius:12px;color:#fff;font-weight:950;font-size:clamp(55px,12vw,116px);text-shadow:0 4px 8px #0009}.game-countdown[hidden]{display:none}.record-panel{margin:14px auto;padding:12px;border-radius:12px;background:#e7f3ee;color:#234b51;max-width:690px}.record-panel h3{margin:5px 0}.record-panel button{margin:3px;padding:6px 9px;border-radius:7px;font-size:12px}.record-panel button.active{background:#267a68;color:white}.record-panel table{width:100%;font-size:13px;text-align:left;border-collapse:collapse}.record-panel th,.record-panel td{padding:5px;border-bottom:1px solid #abc}.record-panel .explain{font-size:12px;line-height:1.4}.result-line{font-size:17px;font-weight:850;margin:9px}
+
+/* Expanded word lists: keep the list beside the board in two independent columns. */
+.wrap{max-width:1190px}
+.play-area{grid-template-columns:minmax(0,1fr) 285px;gap:14px}
+.play-area .grid,.play-area .scene{max-width:675px}
+.play-area .sidebar{width:285px}
+.play-area .words{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;column-gap:8px;row-gap:4px}
+.play-area .word{min-width:0;overflow-wrap:anywhere;font-size:12px;line-height:1.25}
+.grid{gap:2px}
+.cell{font-size:clamp(10px,1.4vw,18px)}
+@media(max-width:740px){.play-area{grid-template-columns:minmax(0,1fr) 135px;gap:6px}.play-area .sidebar{width:135px}.play-area .words{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:3px;row-gap:3px}.play-area .word{font-size:9px}.cell{font-size:clamp(8px,1.6vw,13px)}}
+ .mainmenu{position:relative;z-index:12;max-width:760px;margin:14px auto;padding:10px;border-radius:16px;background:linear-gradient(135deg,#204f5b,#327765);color:white;text-align:center}.mainmenu[hidden]{display:none}.menu-card h2{margin:4px 0;font-size:27px}.menu-card p{margin:6px 0}.menu-card button{background:#ffd56a;color:#243c42;font-weight:900;font-size:18px;border-radius:10px;padding:12px 27px;margin:8px}.timerbar #exitgame{background:#e8eeee;color:#21414b;padding:8px 11px;border-radius:9px;font-size:13px}body.in-menu .layout{display:none}body.in-menu #mainmenu{display:block}body.in-menu .toolbar{display:flex} 
+/* Readability trial: smaller grids, larger type. */
+.play-area .grid{container-type:inline-size;gap:1px}
+.grid .cell{min-width:0;min-height:0;padding:0;border:1px solid #7caa9e;border-radius:4px;box-shadow:none;font-family:Arial,system-ui,sans-serif;font-weight:900;line-height:1;letter-spacing:-.025em;font-size:clamp(16px,7cqi,34px)}
+.grid[data-difficulty="hard"] .cell{font-size:clamp(15px,5.7cqi,32px)}
+.grid[data-difficulty="hard"] .cell{font-size:clamp(14px,4.6cqi,29px)}
+@media(max-width:740px){.play-area .grid{gap:1px}.grid .cell{border-width:1px;border-radius:3px}}
+
+/* Completion results: a fixed, centered panel, visible without page scrolling. */
+.results-overlay[hidden]{display:none!important}
+.results-overlay{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:16px;background:rgba(14,35,43,.76)}
+.results-dialog{width:min(94vw,470px);max-height:calc(100dvh - 32px);overflow:auto;background:#fffaf0;border:3px solid #67b69e;border-radius:20px;box-shadow:0 18px 60px #09252c99;padding:22px;text-align:center;color:#213643}
+.results-dialog h2{margin:0 0 12px;font-size:clamp(24px,5vw,32px)}
+.results-dialog .result-time{font-weight:900;font-size:clamp(34px,9vw,55px);font-variant-numeric:tabular-nums;color:#216c60;margin:8px 0}
+.results-dialog p{margin:8px 0}.results-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:20px}
+.results-actions button{padding:12px 17px;background:#267a68;color:white;border:0;border-radius:10px;font-weight:850;cursor:pointer}
+.results-actions button:nth-child(2){background:#204f5b}.results-actions button:nth-child(n+3){background:#235c89}
+
+/* Plus theme previews: real gameplay colours, saved on this device. Purchase gating is pending. */
+.theme-picker{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:7px;margin:7px auto 10px;padding:7px;border:1px solid #719e91;border-radius:12px;background:#ffffffa8;max-width:900px}
+.theme-picker label{font-weight:800;font-size:13px}.theme-picker select{padding:7px;border-radius:8px;border:1px solid #719e91;background:white;color:#213643;font:inherit}.theme-picker small{font-size:11px}
+body[data-theme="midnight"]{--theme-bg:linear-gradient(135deg,#071727,#17394e);--theme-card:#112b40;--theme-ink:#f3f8fb;--theme-tile:#1b4057;--theme-border:#50e3d1;--theme-found:#246c64;--theme-selected:#d18b40;--theme-toolbar:#175b67;--theme-active:#aa6732;--theme-results:#112b40;--theme-result-accent:#72f1d7}
+body[data-theme="lavender"]{--theme-bg:linear-gradient(135deg,#e7d8f5,#f8e9fa);--theme-card:#f9f2ff;--theme-ink:#422d5e;--theme-tile:#eee0fc;--theme-border:#9672c2;--theme-found:#d3b6f1;--theme-selected:#ffce8a;--theme-toolbar:#75539f;--theme-active:#a24e85;--theme-results:#f9f2ff;--theme-result-accent:#71439b}
+body[data-theme="parchment"]{--theme-bg:linear-gradient(135deg,#d4bb87,#f1e4c7);--theme-card:#f6eccf;--theme-ink:#48331d;--theme-tile:#f8efda;--theme-border:#947447;--theme-found:#d7d2a1;--theme-selected:#dbb37e;--theme-toolbar:#735331;--theme-active:#986030;--theme-results:#f6eccf;--theme-result-accent:#765020}
+body[data-theme="emerald"]{--theme-bg:linear-gradient(135deg,#b9e8d0,#e4f5ce);--theme-card:#ecfff3;--theme-ink:#153d2f;--theme-tile:#ddf5e7;--theme-border:#348966;--theme-found:#a7e5bb;--theme-selected:#f4d58f;--theme-toolbar:#186e54;--theme-active:#af7032;--theme-results:#ecfff3;--theme-result-accent:#176b4b}
+body[data-theme]:not([data-theme="classic"]){background:var(--theme-bg);color:var(--theme-ink)}
+body[data-theme]:not([data-theme="classic"]) .card,body[data-theme]:not([data-theme="classic"]) .theme-picker{background:var(--theme-card);color:var(--theme-ink);border-color:var(--theme-border)}
+body[data-theme]:not([data-theme="classic"]) .grid .cell{background:var(--theme-tile);color:var(--theme-ink);border-color:var(--theme-border)}
+body[data-theme]:not([data-theme="classic"]) .grid .cell.selected{background:var(--theme-selected);color:#1c2430}
+body[data-theme]:not([data-theme="classic"]) .grid .cell.found{background:var(--theme-found);color:var(--theme-ink)}
+body[data-theme]:not([data-theme="classic"]) .toolbar button,body[data-theme]:not([data-theme="classic"]) .action,body[data-theme]:not([data-theme="classic"]) .timerbar button{background:var(--theme-toolbar);color:#fff}
+body[data-theme]:not([data-theme="classic"]) .toolbar button.active{background:var(--theme-active)}
+body[data-theme]:not([data-theme="classic"]) .timerbar #clock{color:var(--theme-ink)}
+body[data-theme]:not([data-theme="classic"]) .results-dialog{background:var(--theme-results);color:var(--theme-ink);border-color:var(--theme-border)}
+body[data-theme]:not([data-theme="classic"]) .results-dialog .result-time{color:var(--theme-result-accent)}
+body[data-theme]:not([data-theme="classic"]) .theme-picker select{background:var(--theme-tile);color:var(--theme-ink);border-color:var(--theme-border)}
+body[data-theme]:not([data-theme="classic"]) .record-panel{color:#213643}
+.confetti-burst{position:fixed;inset:0;z-index:220;pointer-events:none;overflow:hidden}
+.confetti-piece{position:absolute;top:-20px;width:9px;height:15px;opacity:0;animation:confetti-fall 2300ms ease-in forwards}
+@keyframes confetti-fall{0%{transform:translateY(-20px) rotate(0);opacity:1}100%{transform:translateY(110vh) rotate(700deg);opacity:0}}
+@media(prefers-reduced-motion:reduce){.confetti-piece{animation:none;display:none}}
+#demo-plus{font-size:14px;padding:9px 13px;background:#b6e8d9}#access-status{font-weight:850}#upgrade-overlay{z-index:250}#upgrade-overlay .results-dialog{max-width:440px} .toolbar button.locked-level:after{content:" 🔒"} .theme-picker small{display:block;text-align:center} @media(max-width:740px){
+  .wrap{padding:6px}
+  .card{padding:6px}
+  .play-area{grid-template-columns:minmax(0,1fr) 92px;gap:5px;align-items:start}
+  .play-area .grid,.play-area .scene{margin:0;align-self:start;justify-self:start}
+  .play-area .sidebar{width:92px}
+  .play-area .words{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin:0 0 8px}
+  .play-area .word{font-size:11px;line-height:1.2;padding:0;overflow-wrap:anywhere}
+  .current{font-size:11px;letter-spacing:0}
+  .controls button{font-size:11px;padding:5px;margin:2px 0;max-width:100%}
+  .progress,.notice{font-size:11px}
+  .plus-note{font-size:10px}
+  .grid .cell{font-size:clamp(12px,7cqi,26px)}
+  .grid[data-difficulty="hard"] .cell{font-size:clamp(11px,6cqi,23px)}
+}
+
+/* iPhone/mobile full-board correction: keep controls/words above the board and let the board use the full available width. */
+@media(max-width:740px){
+  .wrap{padding:4px 4px 12px}
+  .card{padding:4px}
+  .play-area{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+  .play-area .sidebar{width:100%;order:0}
+  .play-area .grid,.play-area .scene{width:100%;max-width:none;order:1;margin:0 auto;align-self:stretch;justify-self:stretch}
+  .play-area .words{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px 6px;margin:0 0 6px;width:100%}
+  .play-area .word{font-size:11px;line-height:1.15;text-align:center;padding:0;overflow-wrap:anywhere}
+  .current{font-size:12px;letter-spacing:0}
+  .controls{display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
+  .controls button{font-size:11px;padding:6px 7px;margin:0}
+  .progress,.notice{font-size:11px}
+  .plus-note{font-size:10px}
+  .grid .cell{font-size:clamp(15px,7cqi,28px)}
+  .grid[data-difficulty="hard"] .cell{font-size:clamp(13px,5.8cqi,24px)}
+}
+
+/* Desktop round information sits below the target words, beside the board. */
+@media(min-width:741px){
+.play-area .sidebar{position:sticky;top:8px}
+.round-status{position:static;background:var(--theme-card,#fffef5);color:var(--theme-ink,#213643);padding:8px 0;margin:8px 0;border-top:2px solid var(--theme-border,#8ab9ae)}
+.round-status #category-name{margin:0 0 6px!important;text-align:center}
+.round-status .timerbar{margin:0;gap:8px;flex-direction:column}
+.round-status #clock{color:var(--theme-result-accent,#20545d)}
+}
+</style></head><body><div class="wrap"><header><h1>Pic n Letters</h1><p>A timed word hunt · Free / Plus access test</p></header><div class="toolbar"><button id="daily">Today's Puzzle</button><button id="fresh">New Puzzle</button><button id="easy" class="active">Easy</button><button id="hard">Hard</button></div><div id="mainmenu" class="mainmenu"><div class="menu-card"><h2>Pic n Letters</h2><p>Find every word to complete the puzzle. Enjoy a word hunt and challenge your personal best.</p><p>Easy is free. Hard is part of Pic n Letters Plus ($4.99 CAD once).</p><p id="access-status" aria-live="polite">Free demo mode</p><button id="demo-plus" type="button">🔓 Enable Demo Plus (TEST ONLY)</button><button id="menustart" type="button">▶ Play Puzzle</button></div></div><div class="theme-picker"><label for="theme-select">🎨 Board theme:</label><select id="theme-select" aria-label="Select a game board theme"><option value="classic">Classic (Free)</option><option value="midnight">Midnight Arcade ✦ Plus preview</option><option value="lavender">Lavender ✦ Plus preview</option><option value="parchment">Classic Parchment ✦ Plus preview</option><option value="emerald">Emerald ✦ Plus preview</option></select><small id="theme-note">Extra themes require Plus. Demo Plus is for testing only; no payment is taken.</small></div><div class="layout"><section class="card"><div class="round-status"><p id="category-name" style="font-weight:bold;margin:0 0 10px" aria-live="polite"></p><div class="timerbar"><span>⏱️ <span id="clock">00:00.0</span></span><button id="startgame" type="button">START</button><button id="exitgame" type="button" aria-label="Exit to main menu">← Exit / Main Menu</button><span id="besttime">Personal best: —</span></div></div><div class="play-area locked" id="playarea"><div class="game-countdown" id="gamecountdown" hidden>4</div><div class="grid" id="grid" aria-label="Letter grid"></div><div class="scene" id="scene" hidden><div class="illustration" id="illustration"></div></div><aside class="sidebar"><div class="words" id="words" aria-label="Words to find"></div><div class="current" id="current" aria-live="polite"></div><div class="controls"><button class="action" id="undo">Undo Letter</button><button class="action" id="clear">Clear</button><button class="action" id="hint">Hint</button></div><div class="progress" id="progress"></div><div class="notice" id="notice" aria-live="polite"></div><p class="plus-note">Plus · $4.99 CAD once · Hard, ad-free and themes <small>(TEST BUILD: no billing or advertising is connected)</small></p></aside></div><div class="end" id="end" aria-live="polite"></div><div class="record-panel"><h3>🏆 Times &amp; daily results</h3><div id="rankmodes"><button data-rank="easy" class="active">Easy</button><button data-rank="hard">Hard</button></div><div id="rankings"></div><div class="explain">Results are saved in this browser on this device. A shared online leaderboard is not connected yet. Daily ranked times are for Today’s Puzzle; hints make a run assisted and exclude it from rankings.</div></div><p class="small">Tap letters in a straight line to find the listed words. Find them all to complete the puzzle.</p></section></div></div><div id="upgrade-overlay" class="results-overlay" hidden><section class="results-dialog" role="dialog" aria-modal="true" aria-labelledby="upgrade-heading" tabindex="-1"><h2 id="upgrade-heading">✦ Pic n Letters Plus</h2><p>One-time $4.99 CAD purchase when the game launches.</p><p>Unlock Hard (20 words), four board themes and ad-free play.</p><p><strong>Test build:</strong> There is no purchase here. Enable Demo Plus on the Main Menu to preview premium features.</p><div class="results-actions"><button type="button" id="upgrade-close">Back to Game</button><button type="button" id="upgrade-demo">Enable Demo Plus — no charge</button></div></section></div><div id="confetti-burst" class="confetti-burst" aria-hidden="true"></div><div id="results-overlay" class="results-overlay" role="presentation" hidden><section class="results-dialog" role="dialog" aria-modal="true" aria-labelledby="results-heading" tabindex="-1"><h2 id="results-heading">🏆 Round Complete!</h2><p id="results-level"></p><div class="result-time" id="results-time"></div><p id="results-best"></p><p id="results-daily"></p><p id="results-status"></p><p style="font-size:12px">Records on this device only; a shared online leaderboard is not yet connected.</p><div class="results-actions"><button type="button" id="results-again">Play Again</button><button type="button" id="results-menu">Main Menu</button><button type="button" id="results-share-score">↗ Share My Score</button><button type="button" id="results-share-game">↗ Share This Game</button></div><p id="share-feedback" role="status" aria-live="polite" style="font-size:13px;min-height:1.2em"></p></section></div><script>
+(()=>{'use strict';const sizes={easy:10,hard:12};let N=10;const gridEl=document.querySelector('#grid'),wordsEl=document.querySelector('#words'),notice=document.querySelector('#notice'),current=document.querySelector('#current'),progress=document.querySelector('#progress'),end=document.querySelector('#end'),scene=document.querySelector('#scene');let difficulty='easy',mode='fresh',serial=0,board=[],placed=[],selected=[],found=new Set(),puzzle=null,tiles=[];
+
+const $=id=>document.getElementById(id),playarea=$('playarea'),countEl=$('gamecountdown'),clock=$('clock'),startBtn=$('startgame');
+function showMenu(){$('results-overlay').hidden=true;stopTimers();playState='menu';countEl.hidden=true;playarea.classList.add('locked');document.body.classList.add('in-menu');$('mainmenu').hidden=false;}
+function showGame(){document.body.classList.remove('in-menu');$('mainmenu').hidden=true;}
+$('results-again').onclick=()=>{newPuzzle('fresh');showGame();};$('results-menu').onclick=showMenu; $('exitgame').onclick=showMenu; $('menustart').onclick=()=>{showGame();newPuzzle('fresh');};
+// Replace the empty link with the official unified store/landing URL at launch.
+// Never share a file:// or temporary blob: address as an installation link.
+const OFFICIAL_GAME_URL='';
+let lastShareResult=null;
+async function shareGameText(kind){
+  const link=OFFICIAL_GAME_URL.trim();
+  let message='Try Pic n Letters, a timed word-search game!';
+  if(kind==='score'){
+    if(!lastShareResult){$('share-feedback').textContent='Finish a round first to share your score.';return;}
+    const r=lastShareResult;
+    message=`I finished Pic n Letters (${r.level}) in ${r.time}${r.assisted?' with a hint (assisted round)':''}! Can you beat my time?`;
+  }
+  if(link)message+='\nPlay here: '+link;
+  else message+='\nOfficial download link coming when the game is published.';
+  const feedback=$('share-feedback');
+  try{
+    if(navigator.share){await navigator.share({title:'Pic n Letters',text:message});feedback.textContent='Sharing menu opened.';return;}
+  }catch(e){if(e && e.name==='AbortError'){feedback.textContent='Sharing cancelled.';return;}}
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){await navigator.clipboard.writeText(message);feedback.textContent='Share message copied. Paste it into Messenger, Facebook or a text.';return;}
+  }catch(e){}
+  const helper=document.createElement('textarea');helper.value=message;helper.style.cssText='position:fixed;left:-9999px;top:0';document.body.append(helper);helper.focus();helper.select();
+  let copied=false;try{copied=document.execCommand('copy')}catch(e){}helper.remove();
+  if(copied){feedback.textContent='Share message copied. Paste it into your preferred app.';return;}
+  feedback.textContent='Select and copy the message shown in the prompt.';
+  window.prompt('Copy this sharing message:',message);
+}
+$('results-share-score').onclick=()=>shareGameText('score');
+$('results-share-game').onclick=()=>shareGameText('game');
+
+let playState='ready',startAt=0,elapsedMs=0,tickHandle=0,stepHandle=0,assisted=false,rankLevel='easy';let hintedIndex=-1;let hintedWord='';
+function getStore(key,defaultValue){try{const x=JSON.parse(localStorage.getItem(key));return x??defaultValue}catch{return defaultValue}}
+function putStore(key,x){try{localStorage.setItem(key,JSON.stringify(x))}catch{}}
+
+// Theme selection is a preview until verified store purchase entitlement is implemented.
+const THEME_IDS=['classic','midnight','lavender','parchment','emerald'];
+function setBoardTheme(id){if(!THEME_IDS.includes(id))id='classic';document.body.dataset.theme=id;$('theme-select').value=id;putStore('hiddenwords:theme:v1',id)}
+// Prototype switch is session-only and is NOT purchase entitlement.
+let demoPlus=false;
+const upgradeOverlay=$('upgrade-overlay');
+function openUpgrade(){upgradeOverlay.hidden=false;upgradeOverlay.querySelector('.results-dialog').focus();}
+function updateAccess(){
+  $('access-status').textContent=demoPlus?'DEMO PLUS enabled — testing only (no purchase)':'FREE demo — Easy available';
+  $('demo-plus').textContent=demoPlus?'🔒 Return to Free Demo':'🔓 Enable Demo Plus (TEST ONLY)';
+  for(const id of ['hard']){$(id).classList.toggle('locked-level',!demoPlus);$(id).setAttribute('aria-label',id+' — '+(demoPlus?'Demo Plus enabled':'Plus required'));}
+  for(const opt of $('theme-select').options){if(opt.value!=='classic')opt.textContent=opt.textContent.replace(' ✦ Plus preview',' ✦ Plus');}
+  $('theme-note').textContent=demoPlus?'DEMO PLUS enabled. Theme selection is saved locally; no payment taken.':'Extra themes require Plus. Enable Demo Plus on the menu to test; no payment taken.';
+  if(!demoPlus&&document.body.dataset.theme!=='classic')setBoardTheme('classic');
+  if(!demoPlus&&difficulty!=='easy'){difficulty='easy';newPuzzle('fresh');}
+}
+function setDemoPlus(on){demoPlus=!!on;upgradeOverlay.hidden=true;updateAccess();}
+$('demo-plus').onclick=()=>setDemoPlus(!demoPlus);
+$('upgrade-close').onclick=()=>upgradeOverlay.hidden=true;
+$('upgrade-demo').onclick=()=>setDemoPlus(true);
+upgradeOverlay.addEventListener('keydown',e=>{if(e.key==='Escape')upgradeOverlay.hidden=true});
+$('theme-select').addEventListener('change',e=>{
+  if(e.target.value!=='classic'&&!demoPlus){$('theme-select').value='classic';openUpgrade();return;}
+  setBoardTheme(e.target.value);
+});
+setBoardTheme('classic');
+
+function celebrateBest(){const layer=$('confetti-burst');layer.replaceChildren();if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;const colors=['#50e3d1','#ffd56a','#e185ad','#8da7ed','#a6d47b'];for(let i=0;i<45;i++){const p=document.createElement('i');p.className='confetti-piece';p.style.left=((i*37)%100)+'%';p.style.background=colors[i%colors.length];p.style.animationDelay=((i*71)%650)+'ms';layer.append(p);}setTimeout(()=>layer.replaceChildren(),3100)}
+function msText(ms){const t=Math.max(0,Math.floor(ms/100)),sec=Math.floor(t/10);return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')+'.'+t%10}
+function dayKey(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function bestKey(level){return 'hiddenwords:best:categories:v1:'+level}
+function dailyKey(level){return 'hiddenwords:daily:categories:v1:'+dayKey()+':'+level}
+function updateBest(){const b=getStore(bestKey(difficulty),null);$('besttime').textContent='Personal best: '+(b===null?'—':msText(b))}
+function updateRanks(){for(const b of document.querySelectorAll('[data-rank]'))b.classList.toggle('active',b.dataset.rank===rankLevel);const best=getStore(bestKey(rankLevel),null),scores=getStore(dailyKey(rankLevel),[]);$('rankings').innerHTML=`<p><strong>${rankLevel.toUpperCase()}</strong> · Personal best (any puzzle): ${best===null?'—':msText(best)}</p><p>Today's Puzzle · local daily times</p>`+(scores.length?`<table><thead><tr><th>Rank</th><th>Time</th><th>Completed</th></tr></thead><tbody>${scores.map((x,i)=>`<tr><td>${i+1}</td><td>${msText(x.ms)}</td><td>${x.at}</td></tr>`).join('')}</tbody></table>`:'<p>No unassisted completion recorded today.</p>')}
+for(const b of document.querySelectorAll('[data-rank]'))b.addEventListener('click',()=>{rankLevel=b.dataset.rank;updateRanks()});
+function stopTimers(){clearInterval(tickHandle);clearInterval(stepHandle);tickHandle=stepHandle=0}
+function resetStart(){stopTimers();playState='ready';elapsedMs=0;assisted=false;clock.textContent='00:00.0';countEl.hidden=true;playarea.classList.add('locked');startBtn.textContent='START';startBtn.disabled=false;updateBest();updateRanks()}
+function startRound(){if(playState!=='ready')return;playState='countdown';startBtn.disabled=true;let n=4;countEl.hidden=false;countEl.textContent=n;stepHandle=setInterval(()=>{n--;if(n>0){countEl.textContent=n;return}if(n===0){countEl.textContent='GO!';playarea.classList.remove('locked');playState='playing';startAt=performance.now();tickHandle=setInterval(()=>{if(playState==='playing'){elapsedMs=performance.now()-startAt;clock.textContent=msText(elapsedMs)}},65);return}clearInterval(stepHandle);countEl.hidden=true},1000)}
+startBtn.onclick=startRound;
+function finishRound(){if(playState!=='playing')return;elapsedMs=performance.now()-startAt;playState='complete';stopTimers();clock.textContent=msText(elapsedMs);startBtn.textContent='COMPLETED';startBtn.disabled=true;const old=getStore(bestKey(difficulty),null);let note=`Finished in ${msText(elapsedMs)}!`;if(!assisted){if(old===null||elapsedMs<old){putStore(bestKey(difficulty),elapsedMs);note+=' 🏆 NEW PERSONAL BEST!'}if(mode==='daily'){const key=dailyKey(difficulty),a=getStore(key,[]);a.push({ms:elapsedMs,at:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})});a.sort((x,y)=>x.ms-y.ms);putStore(key,a.slice(0,20));note+=' · Daily rank: '+(a.findIndex(x=>x.ms===elapsedMs)+1)}}else{note+=' · Assisted run (hint used): not ranked.'}updateBest();rankLevel=difficulty;updateRanks();end.textContent=note;
+$('results-level').textContent=difficulty.toUpperCase()+' · '+(mode==='daily'?"Today's Puzzle":'New Puzzle');
+$('results-time').textContent=msText(elapsedMs);
+const best=getStore(bestKey(difficulty),null);
+$('results-best').textContent='Personal best: '+(best===null?'—':msText(best));
+const scores=getStore(dailyKey(difficulty),[]);
+$('results-daily').textContent=mode==='daily'&&!assisted?'Today’s local rank: '+(scores.findIndex(x=>x.ms===elapsedMs)+1):'Today’s local ranked times: '+scores.length;
+$('results-status').textContent=assisted?'Hint used · Assisted round (not ranked).':(old===null||elapsedMs<old?'🏆 New personal best!':'Round completed!');
+lastShareResult={level:difficulty.toUpperCase(),time:msText(elapsedMs),assisted};$('share-feedback').textContent='';
+$('results-overlay').hidden=false;if(!assisted&&(old===null||elapsedMs<old))celebrateBest();
+$('results-overlay').querySelector('.results-dialog').focus();} 
+const categories=[{"name": "Animals", "words": ["TIGER", "LION", "ZEBRA", "HORSE", "DONKEY", "MONKEY", "GIRAFFE", "PANTHER", "LEOPARD", "CHEETAH", "RABBIT", "HAMSTER", "GERBIL", "FERRET", "OTTER", "BADGER", "BEAVER", "FOX", "WOLF", "COYOTE", "BEAR", "PANDA", "KOALA", "WOMBAT", "POSSUM", "MOOSE", "DEER", "ELK", "BISON", "BUFFALO", "CAMEL", "LLAMA", "ALPACA", "SHEEP", "GOAT", "PIG", "COW", "MOUSE", "RAT", "BAT", "SEAL", "WALRUS", "DOLPHIN", "WHALE", "SHARK", "TURTLE", "LIZARD", "GECKO", "IGUANA", "FROG", "TOAD", "SNAKE", "PYTHON", "COBRA"]}, {"name": "Birds", "words": ["ROBIN", "SPARROW", "EAGLE", "HAWK", "FALCON", "OWL", "RAVEN", "CROW", "MAGPIE", "BLUEJAY", "FINCH", "CANARY", "PARROT", "MACAW", "PIGEON", "DOVE", "SWALLOW", "SWIFT", "WREN", "THRUSH", "SEAGULL", "TERN", "PUFFIN", "PENGUIN", "OSTRICH", "EMU", "KIWI", "HERON", "CRANE", "STORK", "PELICAN", "SWAN", "GOOSE", "DUCK", "MALLARD", "TEAL", "LOON", "GREBE", "IBIS", "QUAIL", "GROUSE", "TURKEY", "CHICKEN", "ROOSTER", "HEN", "NEST", "FEATHER", "BEAK", "WING", "TALON"]}, {"name": "Food", "words": ["APPLE", "BANANA", "ORANGE", "PEACH", "PEAR", "PLUM", "GRAPE", "MELON", "MANGO", "PAPAYA", "KIWI", "LEMON", "LIME", "CHERRY", "BERRY", "APRICOT", "FIG", "DATE", "RAISIN", "CARROT", "POTATO", "TOMATO", "ONION", "GARLIC", "CELERY", "CABBAGE", "LETTUCE", "SPINACH", "PEA", "BEAN", "CORN", "RICE", "PASTA", "BREAD", "TOAST", "BAGEL", "MUFFIN", "COOKIE", "CAKE", "PIE", "PUDDING", "CHEESE", "YOGURT", "MILK", "CREAM", "BUTTER", "EGG", "BACON", "HAM", "STEAK", "CHICKEN", "SALMON", "TUNA", "SOUP", "SALAD", "PIZZA", "TACO"]}, {"name": "Hockey", "words": ["PUCK", "STICK", "SKATE", "RINK", "ICE", "GOAL", "NET", "POST", "CREASE", "GOALIE", "MASK", "PAD", "GLOVE", "BLOCKER", "HELMET", "VISOR", "JERSEY", "BENCH", "PERIOD", "SHIFT", "PASS", "SHOT", "SAVE", "CHECK", "FACEOFF", "OFFSIDE", "ICING", "PENALTY", "REFEREE", "WHISTLE", "CAPTAIN", "COACH", "CENTER", "WINGER", "DEFENSE", "FORWARD", "ASSIST", "REBOUND", "PLAYOFF", "TROPHY", "FLAMES", "STARS", "OILERS", "CANUCKS", "LEAFS", "BRUINS", "SABRES", "KINGS", "SHARKS", "DUCKS", "JETS"]}, {"name": "Music", "words": ["GUITAR", "PIANO", "DRUM", "VIOLIN", "VIOLA", "CELLO", "BASS", "HARP", "FLUTE", "OBOE", "TRUMPET", "TUBA", "HORN", "BANJO", "UKULELE", "ORGAN", "CYMBAL", "MARACA", "CHIME", "BELL", "SONG", "MELODY", "HARMONY", "RHYTHM", "TEMPO", "BEAT", "NOTE", "CHORD", "VERSE", "CHORUS", "BRIDGE", "LYRIC", "SINGER", "BAND", "CHOIR", "SOLO", "DUET", "TRIO", "CONCERT", "STAGE", "RECORD", "ALBUM", "RADIO", "JAZZ", "BLUES", "ROCK", "POP", "FOLK", "COUNTRY", "OPERA"]}, {"name": "Outdoors", "words": ["FOREST", "TREE", "LEAF", "BRANCH", "ROOT", "BARK", "MOSS", "FERN", "FLOWER", "GRASS", "MEADOW", "FIELD", "HILL", "VALLEY", "SUMMIT", "CLIFF", "CANYON", "RIVER", "STREAM", "CREEK", "LAKE", "POND", "OCEAN", "BEACH", "SAND", "PEBBLE", "STONE", "BOULDER", "TRAIL", "PATH", "HIKE", "CAMP", "TENT", "CABIN", "CANOE", "KAYAK", "PADDLE", "FISHING", "COMPASS", "MAP", "PACK", "BOOT", "ROPE", "FIRE", "SUNRISE", "SUNSET", "DAWN", "DUSK", "PICNIC", "PARK", "GARDEN", "DESERT", "ISLAND"]}, {"name": "Space", "words": ["SUN", "MOON", "EARTH", "MARS", "VENUS", "MERCURY", "JUPITER", "SATURN", "URANUS", "NEPTUNE", "PLUTO", "STAR", "PLANET", "COMET", "METEOR", "GALAXY", "NEBULA", "ORBIT", "ROCKET", "SHUTTLE", "CAPSULE", "ROVER", "PROBE", "LAUNCH", "LANDING", "CRATER", "ECLIPSE", "COSMOS", "SOLAR", "LUNAR", "GRAVITY", "VACUUM", "HELMET", "SUIT", "APOLLO", "GEMINI", "SPUTNIK", "HUBBLE", "HUB", "RING", "CORE", "PLASMA", "PULSAR", "QUASAR", "ZODIAC", "EQUINOX"]}, {"name": "Weather", "words": ["RAIN", "SNOW", "SLEET", "HAIL", "FROST", "ICE", "WIND", "BREEZE", "GUST", "GALE", "STORM", "THUNDER", "CLOUD", "FOG", "MIST", "DEW", "RAINBOW", "DRIZZLE", "SHOWER", "TORNADO", "CYCLONE", "MONSOON", "DROUGHT", "FLOOD", "HEAT", "COLD", "WARM", "COOL", "FREEZE", "THAW", "WINTER", "SPRING", "SUMMER", "AUTUMN", "SEASON", "CLIMATE", "RADAR", "FRONT", "CLEAR", "CLOUDY", "SUNNY", "RAINY", "SNOWY", "WINDY", "STORMY", "ICICLE", "HORIZON"]}, {"name": "Travel", "words": ["CAR", "TRUCK", "BUS", "TRAIN", "TRAM", "TAXI", "PLANE", "JET", "SHIP", "BOAT", "FERRY", "BIKE", "SCOOTER", "SUBWAY", "AIRPORT", "STATION", "TICKET", "LUGGAGE", "HOTEL", "MOTEL", "RESORT", "HOSTEL", "CABIN", "CRUISE", "TOUR", "TRIP", "VOYAGE", "JOURNEY", "ROAD", "STREET", "HIGHWAY", "BRIDGE", "TUNNEL", "MAP", "COMPASS", "ROUTE", "DRIVER", "PILOT", "SAILOR", "CAPTAIN", "SEAT", "WINDOW", "ENGINE", "WHEEL", "BRAKE", "HARBOR", "PORT", "ARRIVAL", "BEACH", "ISLAND", "CITY", "VILLAGE"]}, {"name": "Home", "words": ["KITCHEN", "BEDROOM", "HALL", "ATTIC", "CELLAR", "GARAGE", "PORCH", "PATIO", "DOOR", "WINDOW", "WALL", "FLOOR", "CEILING", "ROOF", "STAIRS", "TABLE", "CHAIR", "SOFA", "COUCH", "BED", "PILLOW", "BLANKET", "SHEET", "DRESSER", "MIRROR", "LAMP", "CLOCK", "CARPET", "CURTAIN", "SHELF", "DESK", "DRAWER", "CLOSET", "CABINET", "SINK", "FAUCET", "SHOWER", "TUB", "TOILET", "OVEN", "STOVE", "FRIDGE", "FREEZER", "TOASTER", "KETTLE", "PAN", "POT", "PLATE", "BOWL", "SPOON", "FORK", "KNIFE", "CUP", "MUG"]}, {"name": "Garden", "words": ["ROSE", "TULIP", "DAISY", "LILY", "IRIS", "VIOLET", "POPPY", "PEONY", "ORCHID", "DAHLIA", "ASTER", "BEGONIA", "PETUNIA", "PANSY", "ZINNIA", "CROCUS", "JASMINE", "SAGE", "THYME", "BASIL", "MINT", "PARSLEY", "CHIVE", "DILL", "FENNEL", "SEED", "BULB", "ROOT", "STEM", "LEAF", "PETAL", "BUD", "BLOOM", "POLLEN", "SOIL", "MULCH", "COMPOST", "WATER", "HOSE", "RAKE", "SPADE", "TROWEL", "SHOVEL", "GLOVE", "POT", "PLANT", "SHRUB", "HEDGE", "VINE", "FERN", "MOSS", "GRASS"]}, {"name": "Sports", "words": ["SOCCER", "TENNIS", "GOLF", "RUGBY", "CRICKET", "HOCKEY", "CURLING", "SKIING", "SKATING", "DIVING", "ROWING", "CYCLING", "RUNNING", "JOGGING", "BOXING", "ARCHERY", "FENCING", "SURFING", "SAILING", "RIDING", "RACING", "TEAM", "PLAYER", "COACH", "REFEREE", "CAPTAIN", "BALL", "BAT", "RACKET", "CLUB", "PUCK", "NET", "GOAL", "SCORE", "POINT", "MATCH", "GAME", "ROUND", "RACE", "TRACK", "FIELD", "COURT", "STADIUM", "ARENA", "MEDAL", "TROPHY", "WINNER", "LEAGUE", "SEASON", "FINAL"]}];const counts={easy:12,hard:20};
+const historyKey='hiddenwords:categoryRotation:v1';
+let categoryCycle=[];
+function pickCategory(mode,id){
+ if(mode==='daily')return categories[id%categories.length];
+ if(!categoryCycle.length){categoryCycle=getStore(historyKey,[]).filter(i=>Number.isInteger(i)&&i>=0&&i<categories.length);}
+ if(!categoryCycle.length){categoryCycle=categories.map((_,i)=>i);for(let i=categoryCycle.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[categoryCycle[i],categoryCycle[j]]=[categoryCycle[j],categoryCycle[i]];}}
+ const index=categoryCycle.shift();putStore(historyKey,categoryCycle);return categories[index];
+}
+function chooseWords(level,random,category){
+ const options=category.words.slice();for(let i=options.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[options[i],options[j]]=[options[j],options[i]];}
+ return options.slice(0,counts[level]);
+}
+function rng(seed){let x=seed|0;return()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return(x>>>0)/4294967296}}function seedDay(){const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()}function makeBoard(seed,level,words){const random=rng(seed),letters=Array(N*N).fill(''),paths=[];const dirs=[[1,0],[0,1],[1,1],[-1,1],[1,-1]];for(const word of words){let chosen=null;for(let tries=0;tries<4000&&!chosen;tries++){const [dx,dy]=dirs[Math.floor(random()*dirs.length)],x=Math.floor(random()*N),y=Math.floor(random()*N),path=[];for(let i=0;i<word.length;i++){const xx=x+dx*i,yy=y+dy*i;if(xx<0||xx>=N||yy<0||yy>=N){path.length=0;break}const idx=yy*N+xx;if(letters[idx]&&letters[idx]!==word[i]){path.length=0;break}path.push(idx)}if(path.length===word.length)chosen=path}if(!chosen)return null;chosen.forEach((idx,i)=>letters[idx]=word[i]);paths.push({word,path:chosen})}const filler='AAAAEEEIIIOOOUUUBBCCDDFFGGHHLLMMNNPPRRSSTTTTWWY';for(let i=0;i<letters.length;i++)if(!letters[i])letters[i]=filler[Math.floor(random()*filler.length)];return{letters,paths}}
+function newPuzzle(nextMode=mode){if(!demoPlus&&difficulty!=='easy'){openUpgrade();return;}$('results-overlay').hidden=true;mode=nextMode;N=sizes[difficulty];gridEl.dataset.difficulty=difficulty;gridEl.style.gridTemplateColumns=`repeat(${N},minmax(0,1fr))`;const id=mode==='daily'?seedDay():Date.now()+serial++;const category=pickCategory(mode,id);let b=null,chosen=[];for(let t=0;t<180&&!b;t++){const selectionSeed=id+t*1249+(difficulty==='easy'?13:29);chosen=chooseWords(difficulty,rng(selectionSeed),category);b=makeBoard(selectionSeed+97,difficulty,chosen);}if(!b){notice.textContent='Could not make a puzzle. Try New Puzzle.';return;}document.querySelector('#category-name').textContent='Word category: '+category.name;puzzle={...b,category};resetStart();hintedIndex=-1;hintedWord='';board=b.letters;placed=b.paths;selected=[];found=new Set();notice.textContent='';end.textContent='';gridEl.hidden=false;scene.hidden=true;gridEl.replaceChildren();tiles=board.map((ch,i)=>{const button=document.createElement('button');button.className='cell';button.type='button';button.textContent=ch;button.setAttribute('aria-label',`Row ${Math.floor(i/N)+1}, column ${i%N+1}, ${ch}`);button.onclick=()=>tap(i);gridEl.append(button);return button});refresh()}function lineOK(path){if(path.length<2)return true;const a=path[0],b=path[1],dx=Math.sign(b%N-a%N),dy=Math.sign(Math.floor(b/N)-Math.floor(a/N));if(Math.abs(b%N-a%N)>1||Math.abs(Math.floor(b/N)-Math.floor(a/N))>1)return false;return path.every((v,i)=>v===a+i*(dy*N+dx)&&Math.floor(v/N)===Math.floor(a/N)+i*dy&&v%N===a%N+i*dx)}function tap(idx){if(playState!=='playing')return;if(idx===hintedIndex){hintedIndex=-1;}if(selected.includes(idx)){notice.textContent='That letter is already selected.';return}const attempt=[...selected,idx];if(!lineOK(attempt)){selected=[idx];notice.textContent='Start a new straight line.'}else{selected=attempt;notice.textContent=''}const letters=selected.map(i=>board[i]).join('');const hit=placed.find(p=>p.word===letters&&!found.has(p.word)&&p.path.join(',')===selected.join(','));if(hit){found.add(hit.word);selected=[];notice.textContent=`Found ${hit.word}!`;if(found.size===placed.length){finishRound();notice.textContent='All words found!';}}else if(selected.length>=8){selected=[];notice.textContent='Try another word.'}refresh()}function refresh(){const claimed=new Set(placed.filter(p=>found.has(p.word)).flatMap(p=>p.path));tiles.forEach((el,i)=>{el.classList.toggle('selected',selected.includes(i));el.classList.toggle('found',claimed.has(i));el.classList.toggle('hint',i===hintedIndex&&!claimed.has(i))});current.textContent=selected.map(i=>board[i]).join(' ')||'Tap letters to find a word';wordsEl.innerHTML=placed.map(p=>`<span class="word ${found.has(p.word)?'done':''} ${hintedWord===p.word?'hint-word':''}">${p.word}</span>`).join('');progress.textContent=`${found.size} of ${placed.length} words found · ${mode==='daily'?"Today's puzzle":'New puzzle'} · ${difficulty}`;for(const b of ['easy','hard'])document.querySelector('#'+b).classList.toggle('active',difficulty===b)}document.querySelector('#undo').onclick=()=>{if(playState!=='playing')return;selected.pop();refresh()};document.querySelector('#clear').onclick=()=>{if(playState!=='playing')return;selected=[];notice.textContent='';refresh()};document.querySelector('#hint').onclick=()=>{if(playState!=='playing')return;assisted=true;const p=placed.find(p=>!found.has(p.word));if(!p)return;hintedIndex=p.path[0];hintedWord=p.word;refresh();notice.textContent=`Find ${p.word}: its first letter (${board[hintedIndex]}) is highlighted in bright yellow until you tap it.`};document.querySelector('#daily').onclick=()=>newPuzzle('daily');document.querySelector('#fresh').onclick=()=>newPuzzle('fresh');for(const level of ['easy','hard'])document.querySelector('#'+level).onclick=()=>{if(level!=='easy'&&!demoPlus){openUpgrade();return;}difficulty=level;newPuzzle()};newPuzzle('fresh');showMenu();updateAccess()})();
+</script><script>
+(()=>{
+const status=document.querySelector('.round-status');
+const home=document.createComment('Round information original position');
+status.before(home);
+const desktop=matchMedia('(min-width:741px)');
+function placeStatus(){
+ if(desktop.matches)document.querySelector('#words').after(status);
+ else home.after(status);
+}
+desktop.addEventListener('change',placeStatus);
+placeStatus();
+})();
+</script></body></html>
